@@ -1,0 +1,6 @@
+*.xml
+*.html
+*.txt
+*.md~
+.DS_Store
+/lib/
