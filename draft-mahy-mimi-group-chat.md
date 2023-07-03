@@ -94,29 +94,29 @@ extension of the Extensible Messaging and Presence Protocol (XMPP) {{XMPP}}.
 The terms in this document and {{?I-D.ralston-mimi-terminology}} have not yet
 been aligned.
 
-Room:
+**Room**:
 : A room, also known as a chat room or group chat, is a virtual space users
 figuratively enter in order to participate in text-based conferencing.
 When used with MLS it typically has a 1:1 relationship with an MLS group.
 
-User:
+**User**:
 : A single human user or automated agent (ex: chat bot) with a distinct identifiable
 representation in a room.
 
-Client:
+**Client**:
 : An instant messaging agent instance associated with a specific user account on a
 specific device. For example, the mobile phone instance used by the user
 @alice@example.com.
 
-Multi-device support:
+**Multi-device support**:
 : A room which supports users, each of which can have multiple client instances
 (ex: a Desktop client and mobile phone).
 
-User-Affiliation:
+**User-Affiliation**:
 : A long-lived association reflecting the privilege level of a user in a room.
-Possible values are owner, admin, member, none, or outcast. **
+Possible values are owner, admin, regular-user, none, or outcast. **
 
-Occupant:
+**Occupant**:
 : A user with a user-affiliation of owner, admin, or member.
 
 Client-Role:
@@ -143,25 +143,25 @@ of one user account.
 
 ## Moderation Terms
 
-Knock:
+**Knock**:
 : To request entry into a room.
 
-Ban:
+**Ban**:
 : To remove a user from a room such that the user is not allowed to re-enter
 the room (until and unless the ban has been removed). A banned user has a
 user-affiliation of "outcast".
 
-Kick:
+**Kick**:
 : To temporarily remove a participant or visitor from a room. The user is allowed
 to re-enter the room at any time.
 
-Voice (noun):
+**Voice** *(noun)*:
 : The privilege to send messages in a room.
 
-Revoke Voice:
+**Revoke Voice**:
 : To remove the permission to send messages in a room.
 
-Grant Voice:
+**Grant Voice**:
 : To grant the permission to send messages in a room.
 
 ## MLS Terms
@@ -181,7 +181,7 @@ An MLS GroupInfo (GI) object is the information needed for a client to
 externally join an MLS group using an External Commit. The GroupInfo
 changes with each MLS epoch.
 
-MLS group agreement refers to the property of MLS that for every epoch in an
+**MLS group agreement** refers to the property of MLS that for every epoch in an
 MLS group, every member can verify that they have the same membership and
 the same GroupContext. This document uses this property to insure that every
 MLS member has the room policy and can independently authorize any MLS action
@@ -329,62 +329,50 @@ These are room policies composed from sets of room capabilities.
 Each capability has two options. Most group chat use cases can
 be composed from these specific capabilities.
 
-Members-Only vs. Open:
-: An open room can be joined by any non-banned user. A members-only room can
-  only be joined by a user in the occupant list. In an enterprise context, it is
+**Membership-Style**:
+: The overall approach of membership authorization in a room, which could be
+  open, members-only (administrated), fixed-membership, or parent-dependent.
+
+**Open room**:
+: An open room can be joined by any non-banned user.
+
+**Members-Only room**:
+: A members-only room can only be joined by a user in the occupant list, or
+  who is pre-authorized. Authorized users can add or remove users
+  to the room. In an enterprise context, it is
   also common for users from a particular domain, group, or workgroup to be
   pre-authorized to add themselves to a Members-Only room.
 
-Knock-Enabled vs. Knock-Disabled:
-: In a knock-enabled room, non-banned users are allowed to programmatically
-  request entry into the room. In a knock-disabled room this functionality
-  is disabled.
-
-Fixed-Membership vs. Flexible-Membership:
+**Fixed-Membership room**:
 : Fixed-membership rooms have the list of occupants specified when they are
-  created. Other users cannot be added. Occupants cannot leave or be removed.
-  The most common case of a fixed-membership room is a 1:1 conversation. Only a
-  single fixed-membership room can exist for any unique set of occupants. By
-  contrast, in a Flexible-Membership room, authorized users can add or remove users
-  to the room.
+  created. Other users cannot be added. Occupants cannot leave or be removed,
+  however a user can remove all its clients from the associated MLS group.
+  The most common case of a fixed-membership room is a 1:1 conversation.
+  This room membership style is used to implement Direct Message (DM) and Group DM
+  features. Only a single fixed-membership room can exist for any unique set
+  of occupants.
+
+**Parent-dependent room**:
+: In a parent-dependent room, the list occupants of the room must be a strict
+  subset of the occupants of the parent room. If a user leaves or is removed
+  from the parent room, that user is automatically removed from any
+  parent-dependent rooms of that parent.
 
 Multi-device vs. Single-device:
 : A multi-device room can have multiple simultaneous clients of the same user
   as participants in the room. A single-device room can have a maximum of one
   client per user in the room at any moment.
 
-Parent-subset vs. Independent:
-: An independent room maintains its list of occupants independently of any other
-  room. In a parent-subset room, the list occupants of the room must be a strict
-  subset of the occupants of the parent room. If a user leaves or is removed
-  from the parent room, that user is automatically removed from parent-subset
-  room.
+Knock-Enabled vs. Knock-Disabled:
+: In a knock-enabled room, non-banned users are allowed to programmatically
+  request entry into the room. In a knock-disabled room this functionality
+  is disabled.
 
 Moderated vs. Unmoderated:
 : An an unmoderated room, any user in the room can send messages to the room.
   In a moderated room, only users who have "voice" can send messages to the room.
 
-Hidden vs. Public:
-: A public room is discoverable/searchable. A hidden room is not.
 
-Non-anonymous vs. Semi-anonymous:
-: In non-anonymous rooms, the expectation is that each user presents
-  a long-term stable identifier which can be correlated across rooms. In
-  semi-anonymous rooms, it is acceptable to obtain a pseudonymous identifier
-  which is unique per room, but would still be associated with the user's
-  provider.
-
-Password-Protected vs. Unsecured:
-: A password-protected room is one that a user cannot enter without first
-  providing the correct password or code. An unsecured room can be
-  entered without entering a password or code.
-
-Persistent vs. Temporary:
-: In MUC, a temporary room is destroyed when the last occupant exits whereas
-  a persistent room is not destroyed when the last occupant exist. MLS has no
-  notion of a group with no members. A persistent room could consist of
-  a sequence of distinct MLS groups. In practice this may be a distinction
-  without a difference.
 
 In the next section we describe how these room characteristics influence the
 rules used to authorize specific MLS primitives.
@@ -433,6 +421,7 @@ Commit:
 
 - if the user of the client to be added is an occupant of the room; or
 - if the room is open; or
+- if the room is parent-dependent *and* the client is a member of the parent group; or
 - if the room is flexible_membership *and* the "adding user" is a room admin or owner
 
 If the room is single-device, clients must also check that the resulting MLS group
@@ -482,6 +471,8 @@ client to a group:
 - if the joining user is already an occupant of the room; or
 - if the joining user is already pre-authorized to enter the room; or
 - if the target room is open; or
+- if the target room is parent-dependent *and* the joining client is a member of
+  the parent MLS group; or
 - if the joining user proves possession of a valid joining link (and the related
   password or code, if the link required one). See Note 2 below.
 
@@ -503,6 +494,8 @@ the target group, in any of these conditions:
 - if the joining user is already an occupant of the room; or
 - if the joining user is already pre-authorized to enter the room; or
 - if the target room is open; or
+- if the target room is parent-dependent *and* the requesting client is a member of
+  the parent MLS group; or
 - if the joining user proves possession of a valid joining link (and the related
   password or code, if the link required one). See Note 2 below.
 
@@ -539,7 +532,7 @@ the following conditions apply:
 - if the Remove Proposal was sent by the system user of the owning provider; or
 - if the Remove Proposal was sent by the system user corresponding to the
   removed user's provider; or
-- if the room is flexible-membership, **AND** all the following:
+- if the room is not fixed-membership, **AND** all the following:
   - the removing user is an admin or owner of the room, and
   - an admin cannot remove an owner or system user, and
   - an owner cannot remove a system user, and
@@ -552,7 +545,7 @@ the last client or the owning provider should delete the group.
 
 A client can always send a proposal (a Remove proposal or SelfRemove proposal)
 to leave, EXCEPT if
-- the leaving client is the only admin/owner of a administered group; or
+- the leaving client is the only admin/owner of a members-only group; or
 - the leaving client is the last member of the MLS group.
 
 ## Destroy an MLS group
@@ -567,8 +560,8 @@ can safely destroy a room and its corresponding MLS group.
 
 A client can send an application message under the following conditions:
 
-- the client is an occupant of an unmoderated room; or
-- the client is a "regular user" or moderator of a moderated room; or
+- the client's user is an occupant of an unmoderated room; or
+- the client's user is a "regular user" or moderator of a moderated room; or
 - the client is a visitor of the room  AND has been granted "voice" in the room.
 
 ## Update the room / group policy
@@ -620,6 +613,30 @@ The owning provider of a room may also offer additional features such as
 
 The policy could also include a machine readable description of the anti-spam
 and anti-abuse policies.
+
+Other optional room capabilities:
+
+Hidden vs. Public:
+: A public room is discoverable/searchable. A hidden room is not.
+
+Non-anonymous vs. Semi-anonymous:
+: In non-anonymous rooms, the expectation is that each user presents
+  a long-term stable identifier which can be correlated across rooms. In
+  semi-anonymous rooms, it is acceptable to obtain a pseudonymous identifier
+  which is unique per room, but would still be associated with the user's
+  provider.
+
+Password-Protected vs. Unsecured:
+: A password-protected room is one that a user cannot enter without first
+  providing the correct password or code. An unsecured room can be
+  entered without entering a password or code.
+
+Persistent vs. Temporary:
+: In MUC, a temporary room is destroyed when the last occupant exits whereas
+  a persistent room is not destroyed when the last occupant exist. MLS has no
+  notion of a group with no members. A persistent room could consist of
+  a sequence of distinct MLS groups. In practice this may be a distinction
+  without a difference.
 
 ## Room join links
 
@@ -768,6 +785,8 @@ pre-authorization
   bot
 
 
+
+
 # Example Use
 
 ~~~~~
@@ -807,6 +826,41 @@ GET /room/{provider}/{roomId}
 }
 ~~~~~
 
+~~~ C++
+enum {
+  system,
+  owner,
+  admin,
+  regular_user,
+  visitor,
+  banned
+} Role;
+
+struct {
+  Role target_role;
+  std::vector<Ascii> preauth_domain;
+  std::vector<Ascii> preauth_workgroup;
+  std::vector<Ascii> preauth_group;
+  std::vector<Ascii> preauth_user;
+} PreAuthPerRoleList;
+
+enum {
+  open,
+  members-only,
+  fixed-membership,
+  parent-depedent
+} MembershipStyle;
+
+struct {
+  MembershipStyle membership_style;
+  boolean multi_device;
+  boolean knock_allowed;
+  boolean moderated;
+  std::vector<PreAuthPerRoleList> pre_auth_list;
+  Uri parent_room;
+} RoomCapabilities;
+~~~
+
 
 
 
@@ -829,6 +883,23 @@ specifically the compact JSON representation of the policy document.
 # Specific examples
 
 ## One-on-one chat
+
+~~~ json
+"policies": {
+  "membership-style": "fixed",
+  "multi-device": true
+},
+"preauth": {
+  "system-user": [
+     "im:mimi=providerA.example",
+     "im:mimi=providerB.example"
+  ],
+  "regular-user": [
+     "im:mimi=%40alice@providerA.example",
+     "im:mimi=%40bobby@providerB.example"
+  ]
+}
+~~~
 
 - fixed-membership = true
 - multi-device = true
