@@ -2411,23 +2411,23 @@ im:mimi=##xIiZs-mJA6gFSO67f0qYBMun3twIrBU7lXD2y3xbYHI@example.com
         <h3 id="name-room-join-links">
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-room-join-links" class="section-name selfRef">Room join links</a>
         </h3>
-<p id="section-6.2-1">Room join links<a href="#section-6.2-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-6.2-2">
+<p id="section-6.2-1">Room join links are useful to allow clients to find a room, to authorize
+joining that room, and optionally to communicate a code or passphrase in
+an automated fashion.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">The details of how a client obtains or creates a join link are out-of-scope
+of MIMI, but a MIMI client should be able to join a room using a provided
+join link. Such a link should always be specific to a specific room.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-3">When generating a link, the creator might allow a link to be used by a
+single specific user, for an arbitrary single user, or for any number of
+new users. The link might have a specific expiration date and time. The link
+might include or require a code or passphrase.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.2-4">Below is an example of a join link (the whitespace shown before the
+'@' is not included in the URI):<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.2-5">
 <pre>
 im:mimi=#d_Nv1ZCPWArKtN0vhC_Wqw?join;code=k5KUJgAZuDesTsMVxRP
   @example.com
-</pre><a href="#section-6.2-2" class="pilcrow">¶</a>
-</div>
-<div class="lang-tls-presentation sourcecode" id="section-6.2-3">
-<pre>
-struct {
-  Uri room;
-  opaque passcode&lt;V&gt;;
-  uint32 expiration; /* seconds since UNIX epoch */
-  bool multiple_uses;
-  Uri authorized_user;
-} CreateJoiningLinkRequest;
-</pre><a href="#section-6.2-3" class="pilcrow">¶</a>
+</pre><a href="#section-6.2-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -2477,7 +2477,7 @@ struct {
 } RoomPolicy;
 </pre><a href="#section-7.1-1" class="pilcrow">¶</a>
 </div>
-<p id="section-7.1-2">The <code>membership style</code> can be one of the following values as discussed in
+<p id="section-7.1-2">The <code>membership_style</code> can be one of the following values as discussed in
 <a href="#room-capabilities" class="auto internal xref">Section 4</a>:<a href="#section-7.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1-3.1">open<a href="#section-7.1-3.1" class="pilcrow">¶</a>
@@ -2491,13 +2491,13 @@ struct {
         </ul>
 <p id="section-7.1-4">If the <code>membership_style</code> is parent-dependent the parent_room_uri <span class="bcp14">MUST</span> be set
 with the room ID of the parent. Otherwise the field is zero-length.<a href="#section-7.1-4" class="pilcrow">¶</a></p>
-<p id="section-7.1-5">If multi_device is true (the default), the MLS group may contain multiple
+<p id="section-7.1-5">If <code>multi_device</code> is true (the default), the MLS group may contain multiple
 clients per user. If false only a single client can be an MLS member at
 one time.<a href="#section-7.1-5" class="pilcrow">¶</a></p>
 <p id="section-7.1-6">If <code>knock_allowed</code> is true, a user can send a knock requesting access to the
 target room. If false, a user cannot. This option can only be enabled
 if the <code>membership_style</code> is members-only. The default is false.<a href="#section-7.1-6" class="pilcrow">¶</a></p>
-<p id="section-7.1-7">If moderated is true, the room supports granting and revoking voice. The default
+<p id="section-7.1-7">If <code>moderated</code> is true, the room supports granting and revoking voice. The default
 is false.<a href="#section-7.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.1-8">If <code>persistent_room</code> is false, the room will be automatically deleted when the
 corresponding MLS group is destroyed (when there are no clients in the group).
