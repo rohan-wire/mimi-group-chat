@@ -41,7 +41,6 @@ informative:
     title: Multi-User Chat
     author:
      - name: Peter Saint-Andre
-       mail: xsf@stpeter.im
     date: 2022-12-01
     seriesinfo:
        "XSF XEP": "0045"
@@ -768,25 +767,25 @@ im:mimi=##xIiZs-mJA6gFSO67f0qYBMun3twIrBU7lXD2y3xbYHI@example.com
 
 ## Room join links
 
-Room join links
+Room join links are useful to allow clients to find a room, to authorize
+joining that room, and optionally to communicate a code or passphrase in
+an automated fashion.
 
+The details of how a client obtains or creates a join link are out-of-scope
+of MIMI, but a MIMI client should be able to join a room using a provided
+join link. Such a link should always be specific to a specific room.
 
+When generating a link, the creator might allow a link to be used by a
+single specific user, for an arbitrary single user, or for any number of
+new users. The link might have a specific expiration date and time. The link
+might include or require a code or passphrase.
+
+Below is an example of a join link (the whitespace shown before the
+'@' is not included in the URI):
 
 ~~~
 im:mimi=#d_Nv1ZCPWArKtN0vhC_Wqw?join;code=k5KUJgAZuDesTsMVxRP
   @example.com
-~~~
-
-
-
-~~~ tls-presentation
-struct {
-  Uri room;
-  opaque passcode<V>;
-  uint32 expiration; /* seconds since UNIX epoch */
-  bool multiple_uses;
-  Uri authorized_user;
-} CreateJoiningLinkRequest;
 ~~~
 
 
@@ -829,7 +828,7 @@ struct {
 } RoomPolicy;
 ~~~
 
-The `membership style` can be one of the following values as discussed in
+The `membership_style` can be one of the following values as discussed in
 {{room-capabilities}}:
 
 - open
@@ -840,7 +839,7 @@ The `membership style` can be one of the following values as discussed in
 If the `membership_style` is parent-dependent the parent_room_uri MUST be set
 with the room ID of the parent. Otherwise the field is zero-length.
 
-If multi_device is true (the default), the MLS group may contain multiple
+If `multi_device` is true (the default), the MLS group may contain multiple
 clients per user. If false only a single client can be an MLS member at
 one time.
 
@@ -848,7 +847,7 @@ If `knock_allowed` is true, a user can send a knock requesting access to the
 target room. If false, a user cannot. This option can only be enabled
 if the `membership_style` is members-only. The default is false.
 
-If moderated is true, the room supports granting and revoking voice. The default
+If `moderated` is true, the room supports granting and revoking voice. The default
 is false.
 
 If `persistent_room` is false, the room will be automatically deleted when the
