@@ -1,0 +1,3372 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Group Chat Framework for More Instant Messaging Interoperability (MIMI)</title>
+<meta content="Rohan Mahy" name="author">
+<meta content='
+       This document describes a group instant messaging ("group chat") semantic framework
+for the More Instant Messaging Interoperability (MIMI) Working Group. It describes
+several properties and policy options which can be combined to model a wide
+range of chat and multimedia conference types. It also describes how to build
+these options as an overlay to Messaging Layer Security (MLS) groups and to
+authorize MLS primitives. 
+    ' name="description">
+<meta content="xml2rfc 3.17.4" name="generator">
+<meta content="group chat" name="keyword">
+<meta content="muc" name="keyword">
+<meta content="multiuser chat" name="keyword">
+<meta content="multi-user chat" name="keyword">
+<meta content="mls" name="keyword">
+<meta content="xep-45" name="keyword">
+<meta content="draft-mahy-mimi-group-chat-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.17.4
+    Python 3.11.4
+    ConfigArgParse 1.5.3
+    google-i18n-address 3.1.0
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.2
+    platformdirs 3.8.0
+    pycountry 22.3.5
+    PyYAML 6.0
+    requests 2.31.0
+    setuptools 67.7.2
+    six 1.16.0
+    wcwidth 0.2.6
+-->
+<link href="draft-mahy-mimi-group-chat.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+}
+:is(ol, ul) :is(ol, ul) {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  line-height: 1;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+}
+dl.olPercent {
+  --indent: 5ch;
+}
+dl > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+dl.olPercent > dt {
+  min-width: calc(var(--indent) - 2ch);
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:first-child, .break:first-child + *) {
+  margin-top: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:last-child) {
+  margin-bottom: 0;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    overflow-x: auto;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+}
+a.pilcrow[href] { color: var(--pilcrow-weak); }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  min-width: var(--identifier-width);
+  clear: left;
+  float: left;
+  text-align: right;
+  margin-right: 1ch;
+}
+#identifiers dd {
+  margin: 0;
+  margin-left: calc(1em + var(--identifier-width)) !important;
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+#toc a.xref {
+  white-space: normal;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 10ch;
+  margin-right: 1.5ch;
+}
+.references dt:target::before {
+  content: "⇒";
+  width: 15px;
+  margin: 0 10px 0 -25px;
+}
+.references dd {
+  margin-left: 12ch !important;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul :is(p, li) {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Provide styling for table cell text alignment */
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  dd {
+    page-break-before: avoid;
+  }
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">MIMI Group Chat</td>
+<td class="right">July 2023</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Mahy</td>
+<td class="center">Expires 11 January 2024</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">MIMI</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-mahy-mimi-group-chat-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2023-07-10" class="published">10 July 2023</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2024-01-11">11 January 2024</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">R. Mahy</div>
+<div class="org">Wire</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Group Chat Framework for More Instant Messaging Interoperability (MIMI)</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document describes a group instant messaging ("group chat") semantic framework
+for the More Instant Messaging Interoperability (MIMI) Working Group. It describes
+several properties and policy options which can be combined to model a wide
+range of chat and multimedia conference types. It also describes how to build
+these options as an overlay to Messaging Layer Security (MLS) groups and to
+authorize MLS primitives.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-mahy-mimi-group-chat/">https://datatracker.ietf.org/doc/draft-mahy-mimi-group-chat/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        MIMI Working Group mailing list (<span><a href="mailto:mimi@ietf.org">mailto:mimi@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/mimi/">https://mailarchive.ietf.org/arch/browse/mimi/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/mimi/">https://www.ietf.org/mailman/listinfo/mimi/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/rohan-wire/mimi-groupchat/">https://github.com/rohan-wire/mimi-groupchat/</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 11 January 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2023 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-general-terms" class="internal xref">General Terms</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1" class="keepWithNext"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-moderation-terms" class="internal xref">Moderation Terms</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-user-roles" class="internal xref">User Roles</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4">
+                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="auto internal xref">2.4</a>.  <a href="#name-mls-terms" class="internal xref">MLS Terms</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-joining-rooms" class="internal xref">Joining Rooms</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-room-capabilities" class="internal xref">Room Capabilities</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-authorizing-mls-primitives" class="internal xref">Authorizing MLS primitives</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-create-an-mls-group" class="internal xref">Create an MLS group</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-send-a-commit-with-add-prop" class="internal xref">Send a Commit with Add proposal</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-fetch-keypackages" class="internal xref">Fetch KeyPackages</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-send-an-external-commit-or-" class="internal xref">Send an External Commit (or External Proposal) to add itself.</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="auto internal xref">5.5</a>.  <a href="#name-fetch-the-groupinfo" class="internal xref">Fetch the GroupInfo</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.6">
+                <p id="section-toc.1-1.5.2.6.1"><a href="#section-5.6" class="auto internal xref">5.6</a>.  <a href="#name-receive-a-welcome-message" class="internal xref">Receive a Welcome message</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.7">
+                <p id="section-toc.1-1.5.2.7.1"><a href="#section-5.7" class="auto internal xref">5.7</a>.  <a href="#name-send-a-commit-with-remove-p" class="internal xref">Send a Commit with Remove proposal</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.8">
+                <p id="section-toc.1-1.5.2.8.1"><a href="#section-5.8" class="auto internal xref">5.8</a>.  <a href="#name-leave-an-mls-group" class="internal xref">Leave an MLS group</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.9">
+                <p id="section-toc.1-1.5.2.9.1"><a href="#section-5.9" class="auto internal xref">5.9</a>.  <a href="#name-destroy-an-mls-group" class="internal xref">Destroy an MLS group</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.10">
+                <p id="section-toc.1-1.5.2.10.1"><a href="#section-5.10" class="auto internal xref">5.10</a>. <a href="#name-send-an-application-message" class="internal xref">Send an application message</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11">
+                <p id="section-toc.1-1.5.2.11.1"><a href="#section-5.11" class="auto internal xref">5.11</a>. <a href="#name-update-the-room-group-polic" class="internal xref">Update the room / group policy</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.12">
+                <p id="section-toc.1-1.5.2.12.1"><a href="#section-5.12" class="auto internal xref">5.12</a>. <a href="#name-send-other-mls-proposal-typ" class="internal xref">Send other MLS proposal types</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-other-room-policies" class="internal xref">Other Room Policies</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-fixed-membership-groups-nam" class="internal xref">Fixed-membership groups, naming convention</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-room-join-links" class="internal xref">Room join links</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-room-policy-format-syntax" class="internal xref">Room Policy format syntax</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-membership-related-policy" class="internal xref">Membership-related policy</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-pre-authorized-users" class="internal xref">Pre-authorized users</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-delivery-and-read-notificat" class="internal xref">Delivery and Read notifications, Pseudonyms</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-link-logging-history-and-bo" class="internal xref">Link, Logging, History, and Bot policies</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.1">
+                    <p id="section-toc.1-1.7.2.4.2.1.1"><a href="#section-7.4.1" class="auto internal xref">7.4.1</a>.  <a href="#name-link-policies" class="internal xref">Link policies</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.2">
+                    <p id="section-toc.1-1.7.2.4.2.2.1"><a href="#section-7.4.2" class="auto internal xref">7.4.2</a>.  <a href="#name-logging-policies" class="internal xref">Logging policies</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.3">
+                    <p id="section-toc.1-1.7.2.4.2.3.1"><a href="#section-7.4.3" class="auto internal xref">7.4.3</a>.  <a href="#name-chat-history-policies" class="internal xref">Chat history policies</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.4">
+                    <p id="section-toc.1-1.7.2.4.2.4.1"><a href="#section-7.4.4" class="auto internal xref">7.4.4</a>.  <a href="#name-chat-bot-policies" class="internal xref">Chat bot policies</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.5">
+                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="auto internal xref">7.5</a>.  <a href="#name-extensibility-of-the-policy" class="internal xref">Extensibility of the policy format</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-formal-syntax" class="internal xref">Formal Syntax</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-mls-extension" class="internal xref">MLS extension</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-specific-examples" class="internal xref">Specific examples</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-one-on-one-chat" class="internal xref">One-on-one chat</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-administrated-room" class="internal xref">Administrated room</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-open-room" class="internal xref">Open room</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4">
+                <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-semi-open-room" class="internal xref">Semi-open room</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.5">
+                <p id="section-toc.1-1.9.2.5.1"><a href="#section-9.5" class="auto internal xref">9.5</a>.  <a href="#name-moderated-room" class="internal xref">Moderated room</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.6">
+                <p id="section-toc.1-1.9.2.6.1"><a href="#section-9.6" class="auto internal xref">9.6</a>.  <a href="#name-room-with-mandatory-logging" class="internal xref">Room with mandatory logging</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.1">
+                <p id="section-toc.1-1.12.2.1.1"><a href="#section-12.1" class="auto internal xref">12.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.2">
+                <p id="section-toc.1-1.12.2.2.1"><a href="#section-12.2" class="auto internal xref">12.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-todos" class="internal xref">TODOs</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Group instant messaging ("group chat") is available on dozens of messaging
+platforms. It can be used in a proliferation of modes, from a three-person
+adhoc chat group, to an open discussion group, to a fully-moderated
+auditorium-style group, and in many other configurations.  While they go by many names,
+(channels, groups, chats, rooms), in this document we will refer to group chats
+as rooms.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Making rooms interoperable across existing clients is challenging, as rooms and clients
+can support different policies and capabilities across vendors and providers.
+Our goal is to balance the policy and authorization goals of the room with the
+policy and authorization goals of the end user, so we can support a broad range
+of vendors and providers. We need to map these functions onto the primitives of
+the underlying Messaging Layer Security (MLS) protocol <span>[<a href="#I-D.ietf-mls-protocol" class="cite xref">I-D.ietf-mls-protocol</a>]</span>
+used for end-to-end encryption.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">We assume that each room is owned by one provider at a time. The owning provider
+controls the range of acceptable policies. The user responsible for the room can
+further choose among the acceptable policies. Users (regardless if on other providers) can either
+accept the policies of the room or not. However we want to make it as easy as
+possible for clients from other providers to comply with the room policy primitives
+without enumerating specific features or requiring all clients implementations to
+present an identical user experience.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This work is largely complimentary to the work of specifying an MLS Distribution
+Service for MIMI in <span>[<a href="#I-D.robert-mimi-delivery-service" class="cite xref">I-D.robert-mimi-delivery-service</a>]</span>.<a href="#section-1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="terminology">
+<section id="section-2">
+      <h2 id="name-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<div id="general-terms">
+<section id="section-2.1">
+        <h3 id="name-general-terms">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-general-terms" class="section-name selfRef">General Terms</a>
+        </h3>
+<p id="section-2.1-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">This document borrows heavily from the semantics of the Multi-User Chat <span>[<a href="#MUC" class="cite xref">MUC</a>]</span>
+extension of the Extensible Messaging and Presence Protocol (XMPP) <span>[<a href="#XMPP" class="cite xref">XMPP</a>]</span>.
+The terms used here differ from MUC in two important ways.
+First, MUC has separate notions of an "affiliation" (which effectively applies to a user),
+and a "role" (which effectively applies to a client). This document describes
+roles that are assigned to users, but permissions associated with those roles
+apply to the user or to a client of such a user, depending on the context. For
+example, while a user might have an admin role authorizing her to add a new user
+to a group chat, only one of her clients which is a member of the associated
+MLS group is actually capable of adding the new user's clients to the group.
+Second, MLS uses the term <em>member</em> to refer to clients that have the keying material
+for the group in a particular epoch. To avoid confusion, the MUC affiliation
+"member" corresponds to the user role "regular-user" in this document, and "visitor"
+becomes a role associated with a user.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3">The terms in this document and <span>[<a href="#I-D.ralston-mimi-terminology" class="cite xref">I-D.ralston-mimi-terminology</a>]</span> have not yet
+been aligned.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2.1-4">
+          <dt id="section-2.1-4.1">
+<strong>Room</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.2">
+            <p id="section-2.1-4.2.1">A room, also known as a chat room or group chat, is a virtual space users
+figuratively enter in order to participate in text-based conferencing.
+When used with MLS it typically has a 1:1 relationship with an MLS group.<a href="#section-2.1-4.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.3">
+<strong>User</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.4">
+            <p id="section-2.1-4.4.1">A single human user or automated agent (ex: chat bot) with a distinct identifiable
+representation in a room.<a href="#section-2.1-4.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.5">
+<strong>Client</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.6">
+            <p id="section-2.1-4.6.1">An instant messaging agent instance associated with a specific user account on a
+specific device. For example, the mobile phone instance used by the user
+@alice@example.com.<a href="#section-2.1-4.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.7">
+<strong>Multi-device support</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.8">
+            <p id="section-2.1-4.8.1">A room which supports users, each of which can have multiple client instances
+(ex: a Desktop client and mobile phone).<a href="#section-2.1-4.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.9">
+<strong>Role</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.10">
+            <p id="section-2.1-4.10.1">A long-lived position reflecting the privilege level of a <em>user</em> in a room.
+Possible values are owner, admin, regular-user, visitor, none, or outcast.
+A role closely maps to the MUC concept of affiliation, not the MUC concept of role.<a href="#section-2.1-4.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.11">
+<strong>Occupant</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.12">
+            <p id="section-2.1-4.12.1">A user that has at least one client in the corresponding MLS group,
+<em>and</em> a role of owner, admin, regular-user, or visitor.<a href="#section-2.1-4.12.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.13">
+<strong>Room ID</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.14">
+            <p id="section-2.1-4.14.1">An identifier which uniquely identifies a room.<a href="#section-2.1-4.14.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.15">
+<strong>User ID</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.16">
+            <p id="section-2.1-4.16.1">An internal identifier which uniquely identifies a user.<a href="#section-2.1-4.16.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.17">
+<strong>Nickname</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.18">
+            <p id="section-2.1-4.18.1">The identifier by which a user is referred inside a room. Depending on the
+context it may be a display name, handle, pseudonym, or temporary identifier.
+The nickname in one room need not correlate with the nickname for the same user
+in a different room.<a href="#section-2.1-4.18.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.19">
+<strong>Client ID</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.20">
+            <p id="section-2.1-4.20.1">An internal identifier which uniquely identifies one client/device instance
+of one user account.<a href="#section-2.1-4.20.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-4.21">
+<strong>Persistent vs. Temporary rooms</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-4.22">
+            <p id="section-2.1-4.22.1">In MUC, a temporary room is destroyed when the last occupant exits whereas
+a persistent room is not destroyed when the last occupant exist. As MLS has no
+notion of a group with no members, a persistent room could consist of
+a sequence of distinct MLS groups, zero or one of which would exist at a time.<a href="#section-2.1-4.22.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="moderation-terms">
+<section id="section-2.2">
+        <h3 id="name-moderation-terms">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-moderation-terms" class="section-name selfRef">Moderation Terms</a>
+        </h3>
+<span class="break"></span><dl class="dlParallel" id="section-2.2-1">
+          <dt id="section-2.2-1.1">
+<strong>Knock</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-1.2">
+            <p id="section-2.2-1.2.1">To request entry into a room.<a href="#section-2.2-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.2-1.3">
+<strong>Ban</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-1.4">
+            <p id="section-2.2-1.4.1">To remove a user from a room such that the user is not allowed to re-enter
+the room (until and unless the ban has been removed). A banned user has a
+role of "outcast". Typically this action is only used in an open or semi-open
+room. It is distinct than merely removing a user from an administered group.<a href="#section-2.2-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.2-1.5">
+<strong>Kick</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-1.6">
+            <p id="section-2.2-1.6.1">To temporarily remove a participant or visitor from a room. The user is allowed
+to re-enter the room at any time.<a href="#section-2.2-1.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.2-1.7">
+<strong>Voice</strong> <em>(noun)</em>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-1.8">
+            <p id="section-2.2-1.8.1">The privilege to send messages in a room.<a href="#section-2.2-1.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.2-1.9">
+<strong>Revoke Voice</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-1.10">
+            <p id="section-2.2-1.10.1">To remove the permission to send messages in a room.<a href="#section-2.2-1.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.2-1.11">
+<strong>Grant Voice</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-1.12">
+            <p id="section-2.2-1.12.1">To grant the permission to send messages in a room.<a href="#section-2.2-1.12.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.2-1.13">
+<strong>Moderator</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-1.14">
+            <p id="section-2.2-1.14.1">A client whose user has a role of admin or owner in the room. A moderator
+can ban users, and (when allowed in the room) can grant and revoke voice, kick
+individual clients, and grant access (ex: in response to a knock).<a href="#section-2.2-1.14.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="user-roles">
+<section id="section-2.3">
+        <h3 id="name-user-roles">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-user-roles" class="section-name selfRef">User Roles</a>
+        </h3>
+<span class="break"></span><dl class="dlParallel" id="section-2.3-1">
+          <dt id="section-2.3-1.1">
+<strong>System-user</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.3-1.2">
+            <p id="section-2.3-1.2.1">A virtual user of the one of the providers with specific abilities, for example
+to remove users with deleted accounts from all groups associated with that
+user.<a href="#section-2.3-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.3-1.3">
+<strong>Room Owner</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.3-1.4">
+            <p id="section-2.3-1.4.1">The user who created the room or a user who has been designated by the room
+creator or owner as someone with owner status (if allowed); an owner is allowed
+to change the room configuration and destroy persistent rooms, in addition to all admin
+status. A room owner has the role of "owner".<a href="#section-2.3-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.3-1.5">
+<strong>Room Administrator</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.3-1.6">
+            <p id="section-2.3-1.6.1">A user empowered by the room owner to perform administrative functions such
+as adding, removing, or banning users; however, a room administrator is not
+allowed to change the room configuration or to destroy a persistent room.
+A room administrator has the role "admin".<a href="#section-2.3-1.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.3-1.7">
+<strong>Regular-user</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.3-1.8">
+            <p id="section-2.3-1.8.1">A user that is either preauthorized to join the room or that has at least
+one client that is a member of the corresponding MLS group; and that has no
+other more specific role in the room. It has the role of "regular-user"<a href="#section-2.3-1.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.3-1.9">
+<strong>Visitor</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.3-1.10">
+            <p id="section-2.3-1.10.1">In a moderated room, a user who does not automatically have voice when added to
+a room. (in contrast to a regular-user). A visitor has a role of "visitor".<a href="#section-2.3-1.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.3-1.11">
+<strong>Outcast</strong>:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.3-1.12">
+            <p id="section-2.3-1.12.1">A user who has been banned from a room. An outcast has a role of "outcast".<a href="#section-2.3-1.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="mls-terms">
+<section id="section-2.4">
+        <h3 id="name-mls-terms">
+<a href="#section-2.4" class="section-number selfRef">2.4. </a><a href="#name-mls-terms" class="section-name selfRef">MLS Terms</a>
+        </h3>
+<p id="section-2.4-1">The terms MLS client, MLS group, (MLS group) member, Proposal, bare proposal,
+Commit, External Commit, external join, group_id, epoch,
+LeafNode, KeyPackage, GroupInfo,
+GroupContext, GroupContextExtensions Proposal, Distribution Service (DS),
+Authentication Service (AS), Credential, CredentialType, and
+required_capabilities have the same meanings as in the MLS
+protocol <span>[<a href="#I-D.ietf-mls-protocol" class="cite xref">I-D.ietf-mls-protocol</a>]</span>.<a href="#section-2.4-1" class="pilcrow">¶</a></p>
+<p id="section-2.4-2">An MLS <strong>KeyPackage</strong> (KP) is used to establish initial keying material in a group,
+analogous to DoubleRatchet <span>[<a href="#DoubleRatchet" class="cite xref">DoubleRatchet</a>]</span> prekeys, except one KP is used for
+a client per group but each recipient does not require a separate one.<a href="#section-2.4-2" class="pilcrow">¶</a></p>
+<p id="section-2.4-3">An MLS <strong>GroupInfo</strong> (GI) object is the information needed for a client to
+externally join an MLS group using an External Commit. The GroupInfo
+changes with each MLS epoch.<a href="#section-2.4-3" class="pilcrow">¶</a></p>
+<p id="section-2.4-4">MLS <strong>group membership</strong> means that the client is included as a LeafNode in
+the MLS group and has the information necessary to encrypt to and decrypt
+from the group.<a href="#section-2.4-4" class="pilcrow">¶</a></p>
+<p id="section-2.4-5"><strong>MLS group agreement</strong> refers to the property of MLS that for every epoch in an
+MLS group, every member can verify that they have the same membership and
+the same GroupContext. By using the <code>room_policy</code> MLS extension
+<span>[<a href="#I-D.mahy-mls-room-policy-ext" class="cite xref">I-D.mahy-mls-room-policy-ext</a>]</span>, this document uses this property to insure that every
+MLS member has the room policy and can independently authorize any MLS action
+taken within the group.<a href="#section-2.4-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="joining-rooms">
+<section id="section-3">
+      <h2 id="name-joining-rooms">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-joining-rooms" class="section-name selfRef">Joining Rooms</a>
+      </h2>
+<p id="section-3-1">The basic lifecycle of a room starts with creating a room and setting its policies and
+operating style. Then additional users need to join it, leave it, send messages in it,
+and eventually delete it. There are several methods of
+joining, but most systems only implement a user interface for a subset of them.
+In any case, most room policies focus on what <strong>users</strong> are allowed to do, while MLS
+primitives focus on creating MLS groups and adding or removing MLS <strong>clients</strong> from them.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">Many messaging systems support multiple devices or client instances per user.
+In a multi-device context, we expect if the user Alice has 3 stable devices, then
+all three of Alice's clients/devices will be members of the MLS groups for each room
+in which she belongs. If Alice deletes an old client, it should be removed
+from all the MLS groups she belongs to; and if Alice adds a new client, it
+should immediately join all the groups she belongs to. Finally if Alice joins
+or is added to a new multi-device room, all here clients are added near
+simultaneously.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3">For the purposes of mapping clients to users, we adopt some specific terms.
+A client that is a member of the MLS group corresponding to a room is an
+"in-room client".
+A user that has at least one in-room client is an "occupant" of the room. It can be
+an owner, an admin, a visitor, or a "regular user" in the room.  A user might also have no
+relationship with a room or it might be an outcast (a user who is banned from a
+room).<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-4">Say Alice is already in a room. In what ways can Bob end up in the same room as Alice?<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5">Alice could try to add Bob directly. To do that Alice needs to have the
+appropriate room permissions, and Bob needs to allow Alice to fetch the
+necessary information (the KeyPackages) to each of Bob's clients.
+Depending on the provider and Bob's preferences, and Bob's
+relationship with Alice, the provider might not allow Alice to get a KeyPackage
+without some explicit consent.<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6">Alternatively Bob could try to join immediately. To do that Bob needs to have
+permission to fetch the MLS group's GroupInfo and then enter the group via and
+external join. Bob might be allowed
+to fetch the GroupInfo, for example because the room was open, because Bob was already
+pre-authorized, or because Bob used a joining link.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">Finally, in some rooms Bob can "knock" and request admittance into the room.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-8">Walking through the same scenarios (See <a href="#fig-join-methods" class="auto internal xref">Figure 1</a>) in slightly more detail,
+let's use the example of an members-only administered room where Alice is an admin,
+and examine the ways in which Bob could end up as a regular user in the room. In
+this context, "the group" refers to the MLS group corresponding to the room.<a href="#section-3-8" class="pilcrow">¶</a></p>
+<p id="section-3-9">1) If Alice and Bob already have a consent relationship that Bob's provider is aware of,
+Alice can claim an MLS KeyPackage for each of Bob's clients and add them to the group.
+Bob also becomes a regular user of the room.<a href="#section-3-9" class="pilcrow">¶</a></p>
+<p id="section-3-10">2) If Alice and Bob don't have a consent relationship, Alice can request one by
+indicating that user <code>@alice@example.com</code> (Alice) asks user <code>@bob@example.com</code> (Bob)
+to consent to communicating in <code>#room35@example.com</code> (a specific room). (Alice
+could also immediately add Bob to the room's pre-authorization list, which would
+allow Bob to join as in step 3. However Alice might only grant pre-authorization
+contingent on Bob's consent for her to contact Bob directly.)<a href="#section-3-10" class="pilcrow">¶</a></p>
+<p id="section-3-11">If Bob grants consent,
+Bob includes a KeyPackage for each of his clients. Bob could grant
+consent to Alice for her to add him to any room or just the specific room requested.
+(Bob can remove his consent at any time.) Alice uses the provided KeyPackages to
+add all Bob's clients to the group. If the KeyPackages expire before Alice adds
+Bob, she now has consent from Bob and can fetch fresh KeyPackages to add each of
+Bob's clients as in step 1.<a href="#section-3-11" class="pilcrow">¶</a></p>
+<p id="section-3-12">3) Bob discovers the room and tries to join directly with an external join.
+Bob might discover a public and open group
+or Bob may have established a new client that needs to join Bob's existing groups.
+An external join requires a GroupInfo object and a
+<code>ratchet_tree</code> extension. If Bob is pre-authorized as a future occupant of the group,
+Bob's client can download the GroupInfo from the room's owning provider, send an
+External Commit and immediately add the rest of his clients.<a href="#section-3-12" class="pilcrow">¶</a></p>
+<p id="section-3-13">If Bob is not already pre-authorized, Bob can "knock", requesting to be admitted to
+the room, including KeyPackages for each of his clients. This also creates a
+consent for any admin of the room to re-fetch Bob's KeyPackages. An admin or owner
+can then decide to use the (provided or newly fetches KeyPackages) to directly
+add all of Bob's clients.<a href="#section-3-13" class="pilcrow">¶</a></p>
+<p id="section-3-14">4) Bob receives a join link. Bob uses the link to join directly with an external join.
+The link (and any optional password) acts as authorization to fetch the GroupInfo.
+Bob's client adds itself via External Commit and immediately adds any of Bob's
+other clients.<a href="#section-3-14" class="pilcrow">¶</a></p>
+<span id="name-different-ways-to-join-a-ro"></span><div id="fig-join-methods">
+<figure id="figure-1">
+        <div id="section-3-15.1">
+          <div class="alignLeft art-svg artwork" id="section-3-15.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="720" width="376" viewBox="0 0 376 720" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+              <path d="M 40,176 L 40,240" fill="none" stroke="black"></path>
+              <path d="M 40,288 L 40,352" fill="none" stroke="black"></path>
+              <path d="M 136,360 L 136,432" fill="none" stroke="black"></path>
+              <path d="M 136,656 L 136,688" fill="none" stroke="black"></path>
+              <path d="M 152,128 L 152,168" fill="none" stroke="black"></path>
+              <path d="M 160,304 L 160,336" fill="none" stroke="black"></path>
+              <path d="M 184,192 L 184,224" fill="none" stroke="black"></path>
+              <path d="M 264,32 L 264,240" fill="none" stroke="black"></path>
+              <path d="M 264,272 L 264,352" fill="none" stroke="black"></path>
+              <path d="M 264,432 L 264,640" fill="none" stroke="black"></path>
+              <path d="M 368,32 L 368,240" fill="none" stroke="black"></path>
+              <path d="M 368,272 L 368,352" fill="none" stroke="black"></path>
+              <path d="M 368,432 L 368,640" fill="none" stroke="black"></path>
+              <path d="M 264,32 L 368,32" fill="none" stroke="black"></path>
+              <path d="M 8,80 L 120,80" fill="none" stroke="black"></path>
+              <path d="M 176,80 L 256,80" fill="none" stroke="black"></path>
+              <path d="M 40,176 L 168,176" fill="none" stroke="black"></path>
+              <path d="M 184,208 L 256,208" fill="none" stroke="black"></path>
+              <path d="M 40,240 L 168,240" fill="none" stroke="black"></path>
+              <path d="M 264,240 L 368,240" fill="none" stroke="black"></path>
+              <path d="M 264,272 L 368,272" fill="none" stroke="black"></path>
+              <path d="M 40,288 L 144,288" fill="none" stroke="black"></path>
+              <path d="M 160,320 L 256,320" fill="none" stroke="black"></path>
+              <path d="M 40,352 L 144,352" fill="none" stroke="black"></path>
+              <path d="M 264,352 L 368,352" fill="none" stroke="black"></path>
+              <path d="M 264,432 L 368,432" fill="none" stroke="black"></path>
+              <path d="M 8,480 L 104,480" fill="none" stroke="black"></path>
+              <path d="M 160,480 L 256,480" fill="none" stroke="black"></path>
+              <path d="M 8,608 L 104,608" fill="none" stroke="black"></path>
+              <path d="M 160,608 L 256,608" fill="none" stroke="black"></path>
+              <path d="M 264,640 L 368,640" fill="none" stroke="black"></path>
+              <path d="M 112,608 L 136,656" fill="none" stroke="black"></path>
+              <path d="M 136,560 L 160,608" fill="none" stroke="black"></path>
+              <path d="M 112,480 L 136,528" fill="none" stroke="black"></path>
+              <path d="M 136,432 L 160,480" fill="none" stroke="black"></path>
+              <path d="M 128,80 L 152,128" fill="none" stroke="black"></path>
+              <path d="M 152,32 L 176,80" fill="none" stroke="black"></path>
+              <path d="M 128,80 L 152,32" fill="none" stroke="black"></path>
+              <path d="M 152,128 L 176,80" fill="none" stroke="black"></path>
+              <path d="M 112,480 L 136,432" fill="none" stroke="black"></path>
+              <path d="M 136,528 L 160,480" fill="none" stroke="black"></path>
+              <path d="M 112,608 L 136,560" fill="none" stroke="black"></path>
+              <path d="M 136,656 L 160,608" fill="none" stroke="black"></path>
+              <path d="M 168,176 C 176.83064,176 184,183.16936 184,192" fill="none" stroke="black"></path>
+              <path d="M 168,240 C 176.83064,240 184,232.83064 184,224" fill="none" stroke="black"></path>
+              <path d="M 144,288 C 152.83064,288 160,295.16936 160,304" fill="none" stroke="black"></path>
+              <path d="M 144,352 C 152.83064,352 160,344.83064 160,336" fill="none" stroke="black"></path>
+              <polygon class="arrowhead" points="264,608 252,602.4 252,613.6" fill="black" transform="rotate(0,256,608)"></polygon>
+              <polygon class="arrowhead" points="264,480 252,474.4 252,485.6" fill="black" transform="rotate(0,256,480)"></polygon>
+              <polygon class="arrowhead" points="264,320 252,314.4 252,325.6" fill="black" transform="rotate(0,256,320)"></polygon>
+              <polygon class="arrowhead" points="264,208 252,202.4 252,213.6" fill="black" transform="rotate(0,256,208)"></polygon>
+              <polygon class="arrowhead" points="264,80 252,74.4 252,85.6" fill="black" transform="rotate(0,256,80)"></polygon>
+              <polygon class="arrowhead" points="160,168 148,162.4 148,173.6" fill="black" transform="rotate(90,152,168)"></polygon>
+              <polygon class="arrowhead" points="144,688 132,682.4 132,693.6" fill="black" transform="rotate(90,136,688)"></polygon>
+              <polygon class="arrowhead" points="144,360 132,354.4 132,365.6" fill="black" transform="rotate(270,136,360)"></polygon>
+              <polygon class="arrowhead" points="128,80 116,74.4 116,85.6" fill="black" transform="rotate(0,120,80)"></polygon>
+              <polygon class="arrowhead" points="112,608 100,602.4 100,613.6" fill="black" transform="rotate(0,104,608)"></polygon>
+              <polygon class="arrowhead" points="112,480 100,474.4 100,485.6" fill="black" transform="rotate(0,104,480)"></polygon>
+              <g class="text">
+                <text x="24" y="52">Alice</text>
+                <text x="84" y="52">requests</text>
+                <text x="220" y="52">Yes,</text>
+                <text x="24" y="68">Bob's</text>
+                <text x="60" y="68">KP</text>
+                <text x="212" y="68">KP</text>
+                <text x="152" y="84">OK?</text>
+                <text x="312" y="116">Alice</text>
+                <text x="40" y="132">No,</text>
+                <text x="72" y="132">Bob</text>
+                <text x="312" y="132">sends</text>
+                <text x="44" y="148">does</text>
+                <text x="80" y="148">not</text>
+                <text x="120" y="148">authz</text>
+                <text x="316" y="148">Commit</text>
+                <text x="308" y="164">with</text>
+                <text x="224" y="180">CONSENT</text>
+                <text x="304" y="180">Add</text>
+                <text x="88" y="196">Alice</text>
+                <text x="220" y="196">KP</text>
+                <text x="100" y="212">requests</text>
+                <text x="96" y="228">CONSENT</text>
+                <text x="304" y="292">admin</text>
+                <text x="72" y="308">Bob</text>
+                <text x="212" y="308">KP</text>
+                <text x="304" y="308">sends</text>
+                <text x="80" y="324">sends</text>
+                <text x="128" y="324">KNOCK</text>
+                <text x="308" y="324">Commit</text>
+                <text x="348" y="324">w/</text>
+                <text x="76" y="340">with</text>
+                <text x="108" y="340">KP</text>
+                <text x="216" y="340">answering</text>
+                <text x="296" y="340">Add</text>
+                <text x="200" y="356">admin</text>
+                <text x="196" y="372">adds</text>
+                <text x="232" y="372">Bob</text>
+                <text x="24" y="388">No,</text>
+                <text x="60" y="388">room</text>
+                <text x="28" y="404">does</text>
+                <text x="64" y="404">not</text>
+                <text x="104" y="404">authz</text>
+                <text x="16" y="436">Bob</text>
+                <text x="56" y="436">tries</text>
+                <text x="92" y="436">to</text>
+                <text x="16" y="452">get</text>
+                <text x="44" y="452">GI</text>
+                <text x="68" y="452">to</text>
+                <text x="204" y="452">Yes,</text>
+                <text x="20" y="468">join</text>
+                <text x="64" y="468">group</text>
+                <text x="196" y="468">GI</text>
+                <text x="136" y="484">OK?</text>
+                <text x="316" y="516">External</text>
+                <text x="300" y="532">Join</text>
+                <text x="300" y="548">then</text>
+                <text x="336" y="548">add</text>
+                <text x="16" y="564">Bob</text>
+                <text x="48" y="564">has</text>
+                <text x="72" y="564">a</text>
+                <text x="320" y="564">remaining</text>
+                <text x="20" y="580">join</text>
+                <text x="60" y="580">link</text>
+                <text x="204" y="580">Yes,</text>
+                <text x="312" y="580">clients</text>
+                <text x="12" y="596">to</text>
+                <text x="40" y="596">get</text>
+                <text x="68" y="596">GI</text>
+                <text x="196" y="596">GI</text>
+                <text x="136" y="612">OK?</text>
+                <text x="56" y="708">bad</text>
+                <text x="92" y="708">link</text>
+                <text x="124" y="708">or</text>
+                <text x="172" y="708">password</text>
+                <text x="232" y="708">error</text>
+              </g>
+            </svg><a href="#section-3-15.1.1" class="pilcrow">¶</a>
+</div>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-different-ways-to-join-a-ro" class="selfRef">Different ways to join a room using MLS clients</a>
+        </figcaption></figure>
+</div>
+</section>
+</div>
+<div id="room-capabilities">
+<section id="section-4">
+      <h2 id="name-room-capabilities">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-room-capabilities" class="section-name selfRef">Room Capabilities</a>
+      </h2>
+<p id="section-4-1">In earlier sections we described several different types of rooms.
+These are room policies composed from sets of room capabilities.
+Each capability has two options. Most group chat use cases can
+be composed from these specific capabilities.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-4-2">
+        <dt id="section-4-2.1">
+<strong>Membership-Style</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-2.2">
+          <p id="section-4-2.2.1">The overall approach of membership authorization in a room, which could be
+open, members-only (administrated), fixed-membership, or parent-dependent.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-4-2.3">
+<strong>Open room</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-2.4">
+          <p id="section-4-2.4.1">An open room can be joined by any non-banned user.<a href="#section-4-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-4-2.5">
+<strong>Members-Only room</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-2.6">
+          <p id="section-4-2.6.1">A members-only room can only be joined by a user in the occupant list, or
+who is pre-authorized. Authorized users can add or remove users
+to the room. In an enterprise context, it is
+also common for users from a particular domain, group, or workgroup to be
+pre-authorized to add themselves to a Members-Only room.<a href="#section-4-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-4-2.7">
+<strong>Fixed-Membership room</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-2.8">
+          <p id="section-4-2.8.1">Fixed-membership rooms have the list of occupants specified when they are
+created. Other users cannot be added. Occupants cannot leave or be removed,
+however a user can remove all its clients from the associated MLS group.
+The most common case of a fixed-membership room is a 1:1 conversation.
+This room membership style is used to implement Direct Message (DM) and Group DM
+features. Only a single fixed-membership room can exist for any unique set
+of occupants.<a href="#section-4-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-4-2.9">
+<strong>Parent-dependent room</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-2.10">
+          <p id="section-4-2.10.1">In a parent-dependent room, the list occupants of the room must be a strict
+subset of the occupants of the parent room. If a user leaves or is removed
+from the parent room, that user is automatically removed from any
+parent-dependent rooms of that parent.<a href="#section-4-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-4-2.11"><strong>Multi-device vs. Single-device:</strong></dt>
+        <dd style="margin-left: 1.5em" id="section-4-2.12">
+          <p id="section-4-2.12.1">A multi-device room can have multiple simultaneous clients of the same user
+as participants in the room. A single-device room can have a maximum of one
+client per user in the room at any moment.<a href="#section-4-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-4-2.13">
+<strong>Knock-Enabled vs. Knock-Disabled</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-2.14">
+          <p id="section-4-2.14.1">In a knock-enabled room, non-banned users are allowed to programmatically
+request entry into the room. In a knock-disabled room this functionality
+is disabled.<a href="#section-4-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-4-2.15">
+<strong>Moderated vs. Unmoderated</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-2.16">
+          <p id="section-4-2.16.1">An an unmoderated room, any occupant can send messages
+to the room. In a moderated room, only occupants who have "voice" can send messages
+to the room.<a href="#section-4-2.16.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-4-3">In the next section we describe how these room characteristics influence the
+rules used to authorize specific MLS primitives.<a href="#section-4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authorizing-mls-primitives">
+<section id="section-5">
+      <h2 id="name-authorizing-mls-primitives">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-authorizing-mls-primitives" class="section-name selfRef">Authorizing MLS primitives</a>
+      </h2>
+<p id="section-5-1">Below is a list of MLS primitives:<a href="#section-5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-2.1">create an MLS group<a href="#section-5-2.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-2.2">add a client to a group (Commit with Add)<a href="#section-5-2.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-2.3">fetch a KeyPackage<a href="#section-5-2.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-2.4">join a group (External Commit)<a href="#section-5-2.4" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-2.5">fetch GroupInfo<a href="#section-5-2.5" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-2.6">remove a client from a group (Commit with Remove)<a href="#section-5-2.6" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-2.7">leave a group<a href="#section-5-2.7" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-2.8">send an application message<a href="#section-5-2.8" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-5-2.9">update the policy of the group (ex: Commit with GroupContextExtensions)<a href="#section-5-2.9" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-5-3">In general bare proposals are authorized like a Commit from the proposer,
+except as described below.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">Most of these primitives are validated by the clients in an MLS group. For
+example, the clients in an MLS group each individually verify that a Commit
+sent by Alice to add Bob is valid, because Alice is an admin in the
+corresponding room.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">Some primitives are verified primarily by the responsible provider in MIMI.
+This includes, for example, creating a room, validating the first Commit in an MLS group,
+fetching KeyPackages, or fetching a GroupInfo.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<div id="create-an-mls-group">
+<section id="section-5.1">
+        <h3 id="name-create-an-mls-group">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-create-an-mls-group" class="section-name selfRef">Create an MLS group</a>
+        </h3>
+<p id="section-5.1-1">MLS groups are created locally, but for the purposes of this discussion
+we consider the initial Commit message starting epoch 1 (associated with
+an already created room) to cause the group to exist on the owning provider
+and to be accessible to others.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">A user who is an admin or owner of the room, can "create" the corresponding MLS group.
+In a persistent group, a regular user can also "create" the corresponding MLS group.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="send-a-commit-with-add-proposal">
+<section id="section-5.2">
+        <h3 id="name-send-a-commit-with-add-prop">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-send-a-commit-with-add-prop" class="section-name selfRef">Send a Commit with Add proposal</a>
+        </h3>
+<p id="section-5.2-1">In any of these conditions, a client is authorized to send Add proposals in a
+Commit:<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.2-2.1">if the user of the client to be added is already an occupant of the room; or<a href="#section-5.2-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.2-2.2">if the room is open; or<a href="#section-5.2-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.2-2.3">if the room is parent-dependent <em>and</em> the client is a member of the parent group; or<a href="#section-5.2-2.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.2-2.4">if the room is flexible-membership <em>and</em> the "adding user" is a room admin or owner<a href="#section-5.2-2.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-5.2-3">If the room is single-device, clients must also check that the resulting MLS group
+will only contain a single client per user. This check needs to look at the
+combination of all proposals included in the Commit.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+<p id="section-5.2-4">Whenever a logging device, bot, or system-user is added to an MLS group,
+each receiver should verify this is both consistent with the overall room
+policy, and acceptable to the user of the client.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="fetch-keypackages">
+<section id="section-5.3">
+        <h3 id="name-fetch-keypackages">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-fetch-keypackages" class="section-name selfRef">Fetch KeyPackages</a>
+        </h3>
+<p id="section-5.3-1">Most KeyPackages are designed to be used in a single group. In this case they are
+"claimed" and consumed. In MIMI the provider is responsible for authorization checks
+for fetching KeyPackages, enforcing rate limiting, etc. The client who created the
+KeyPackages (the target client) is responsible for verifying that its KeyPackages
+are not used more than once or used in an unintended group.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">The requester <span class="bcp14">SHOULD</span> include the destination room or group id context in which the
+target KeyPackage will be used (to add the target client) when requesting
+KeyPackages. This allows the provider to correlate a claimed KeyPackage with an
+Add proposal to prevent DoS and spam. Privacy concerns may dictate that the requester
+prefers to omit this information or use a pseudonymous context or rate limited
+token such as PrivacyPass <span>[<a href="#I-D.ietf-privacypass-architecture" class="cite xref">I-D.ietf-privacypass-architecture</a>]</span>.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.3-3">In any of these conditions, the provider of the target client
+is authorized to provide a client KeyPackage:<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-4.1">if the requester represents the same user as the target KeyPackage; or<a href="#section-5.3-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.3-4.2">if the target user consented for the requester to access their KeyPackages
+(for this specific room or for all rooms); or<a href="#section-5.3-4.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.3-4.3">if the requester requests a small number of outstanding KeyPackages (ex: 3) at a time
+as allowed by the target provider's policy. See Note 1 below.<a href="#section-5.3-4.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-5.3-5">This check does not apply if the target explicitly provided a KeyPackage to the
+requester, for example in a knock or grant of consent.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
+<p id="section-5.3-6">Note 1: Partially trusting the requester may be more appropriate if the requester
+and the target already have an existing relationship, for example, if they are in a
+shared group, they have a friend-of-friend relation, or the target address is
+already in the requesters contact list or vice versa.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="send-an-external-commit-or-external-proposal-to-add-itself">
+<section id="section-5.4">
+        <h3 id="name-send-an-external-commit-or-">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-send-an-external-commit-or-" class="section-name selfRef">Send an External Commit (or External Proposal) to add itself.</a>
+        </h3>
+<p id="section-5.4-1">In any of these conditions, a client with a valid GroupInfo and <code>ratchet_tree</code>
+is authorized to send an External Commit or External Proposal to Add its own
+client to a group:<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-2.1">if the joining user is already an occupant of the room; or<a href="#section-5.4-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.4-2.2">if the joining user is already pre-authorized to enter the room; or<a href="#section-5.4-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.4-2.3">if the target room is open; or<a href="#section-5.4-2.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.4-2.4">if the target room is parent-dependent <em>and</em> the joining client is a member of
+the parent MLS group; or<a href="#section-5.4-2.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.4-2.5">if the joining user proves possession of a valid joining link (and the related
+password or code, if the link required one). See <a href="#room-join-links" class="auto internal xref">Section 6.2</a> and
+<a href="#room-policy-format-syntax" class="auto internal xref">Section 7</a> for more information about join links.<a href="#section-5.4-2.5" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-5.4-3">If the room is single-device, clients must also check that the resulting MLS group
+will only contain a single client per user. This check needs to look at the
+combination of all proposals included in the Commit.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="fetch-the-groupinfo">
+<section id="section-5.5">
+        <h3 id="name-fetch-the-groupinfo">
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-fetch-the-groupinfo" class="section-name selfRef">Fetch the GroupInfo</a>
+        </h3>
+<p id="section-5.5-1">This primitive is almost same as join step above. This is proving to the room's
+<strong>owning provider</strong> that the requested client is authorized to get the GroupInfo<a href="#section-5.5-1" class="pilcrow">¶</a></p>
+<p id="section-5.5-2">A provider is authorized to return a valid GroupInfo and <code>ratchet_tree</code> for
+the target group, in any of these conditions:<a href="#section-5.5-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.5-3.1">if the joining user is already an occupant of the room; or<a href="#section-5.5-3.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.5-3.2">if the joining user is already pre-authorized to enter the room; or<a href="#section-5.5-3.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.5-3.3">if the target room is open; or<a href="#section-5.5-3.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.5-3.4">if the target room is parent-dependent <em>and</em> the requesting client is a member of
+the parent MLS group; or<a href="#section-5.5-3.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.5-3.5">if the joining user proves possession of a valid joining link (and the related
+password or code, if the link required one). See <a href="#room-join-links" class="auto internal xref">Section 6.2</a> and
+<a href="#room-policy-format-syntax" class="auto internal xref">Section 7</a> for more information about join links.<a href="#section-5.5-3.5" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+<div id="receive-a-welcome-message">
+<section id="section-5.6">
+        <h3 id="name-receive-a-welcome-message">
+<a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-receive-a-welcome-message" class="section-name selfRef">Receive a Welcome message</a>
+        </h3>
+<p id="section-5.6-1">A client that receives a Welcome message determines the corresponding room
+policies from the GroupContext and independently verifies:<a href="#section-5.6-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.6-2.1">if the client's policies are compatible with the policy of the room;<a href="#section-5.6-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.6-2.2">if the user and clients already in the group are acceptable to receiving client; and<a href="#section-5.6-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.6-2.3">if the client's user consented (directly or indirectly) to being added to the room.<a href="#section-5.6-2.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-5.6-3">If the policies are incompatible or there is no consent, the client <span class="bcp14">SHOULD</span>
+immediately leave the group and silently discard any application messages
+received. The client could also report the sender of the Welcome message
+for anti-spam/anti-abuse purposes.<a href="#section-5.6-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="send-a-commit-with-remove-proposal">
+<section id="section-5.7">
+        <h3 id="name-send-a-commit-with-remove-p">
+<a href="#section-5.7" class="section-number selfRef">5.7. </a><a href="#name-send-a-commit-with-remove-p" class="section-name selfRef">Send a Commit with Remove proposal</a>
+        </h3>
+<p id="section-5.7-1">The principles of which users can join a room were discussed extensively. The
+principles of which clients can leave a room are:<a href="#section-5.7-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.7-2.1">a user or the user's provider can remove some or all of its clients;<a href="#section-5.7-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.7-2.2">the owning provider can remove a disruptive client or (all the clients of a) user;<a href="#section-5.7-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.7-2.3">in flexible membership rooms, an admin or owner can remove (all the clients of)
+another user that has the same or lower access in the room.<a href="#section-5.7-2.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-5.7-3">To Send a Commit containing a Remove proposal, or to verify such a Commit,
+the following conditions apply:<a href="#section-5.7-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.7-4.1">if the Remove (or SelfRemove) Proposal was sent by an MLS member; or<a href="#section-5.7-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.7-4.2">if the Remove Proposal was sent by the system user of the owning provider; or<a href="#section-5.7-4.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.7-4.3">if the Remove Proposal was sent by the system user corresponding to the
+removed user's provider; or<a href="#section-5.7-4.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.7-4.4">
+            <p id="section-5.7-4.4.1">if the room is not fixed-membership, <strong>AND</strong> all the following:<a href="#section-5.7-4.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.7-4.4.2.1">the removing user is an admin or owner of the room, and<a href="#section-5.7-4.4.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-5.7-4.4.2.2">an admin cannot remove an owner or system user, and<a href="#section-5.7-4.4.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-5.7-4.4.2.3">an owner cannot remove a system user, and<a href="#section-5.7-4.4.2.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-5.7-4.4.2.4">for any client being removed, all their clients are being removed at the same time.<a href="#section-5.7-4.4.2.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-5.7-5">In addition no Remove proposal can remove the last client from an MLS group. Instead
+the last client or the owning provider should delete the group.<a href="#section-5.7-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="leave-an-mls-group">
+<section id="section-5.8">
+        <h3 id="name-leave-an-mls-group">
+<a href="#section-5.8" class="section-number selfRef">5.8. </a><a href="#name-leave-an-mls-group" class="section-name selfRef">Leave an MLS group</a>
+        </h3>
+<p id="section-5.8-1">A client can always send a proposal (a Remove proposal or SelfRemove proposal)
+to leave, EXCEPT if
+- the leaving client is the only admin/owner of a members-only group; or
+- the leaving client is the last member of the MLS group.<a href="#section-5.8-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="destroy-an-mls-group">
+<section id="section-5.9">
+        <h3 id="name-destroy-an-mls-group">
+<a href="#section-5.9" class="section-number selfRef">5.9. </a><a href="#name-destroy-an-mls-group" class="section-name selfRef">Destroy an MLS group</a>
+        </h3>
+<p id="section-5.9-1">A client can only destroy an MLS group if the client is the last member
+of the MLS group.<a href="#section-5.9-1" class="pilcrow">¶</a></p>
+<p id="section-5.9-2">In rare circumstances (ex: all users in the room were deleted), the owning provider
+can safely destroy a room and its corresponding MLS group.<a href="#section-5.9-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="send-an-application-message">
+<section id="section-5.10">
+        <h3 id="name-send-an-application-message">
+<a href="#section-5.10" class="section-number selfRef">5.10. </a><a href="#name-send-an-application-message" class="section-name selfRef">Send an application message</a>
+        </h3>
+<p id="section-5.10-1">A client can send an application message under the following conditions:<a href="#section-5.10-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.10-2.1">the client's user is an occupant of an unmoderated room; or<a href="#section-5.10-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.10-2.2">the client's user is a "regular user" or moderator of a moderated room; or<a href="#section-5.10-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.10-2.3">the client is a visitor of the room  AND has been granted "voice" in the room.<a href="#section-5.10-2.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+<div id="update-the-room-group-policy">
+<section id="section-5.11">
+        <h3 id="name-update-the-room-group-polic">
+<a href="#section-5.11" class="section-number selfRef">5.11. </a><a href="#name-update-the-room-group-polic" class="section-name selfRef">Update the room / group policy</a>
+        </h3>
+<p id="section-5.11-1">An admin or owner can send a GroupContextExtensions proposal in the MLS group
+which changes the policy of the room provided that:<a href="#section-5.11-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.11-2.1">an admin cannot remove an owner from the pre-authorized list; and<a href="#section-5.11-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.11-2.2">the new policy cannot result in no occupants with in-room clients; and<a href="#section-5.11-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.11-2.3">the new policy cannot result in no admins with in-room clients; and<a href="#section-5.11-2.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.11-2.4">a fixed-membership room cannot be changed to a flexible-membership room.<a href="#section-5.11-2.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-5.11-3">[TODO: check this more rigorously]<a href="#section-5.11-3" class="pilcrow">¶</a></p>
+<p id="section-5.11-4">If clients advertise acceptable policies, a policy change Commit must
+be still compatible with all client policies, <em>or</em> remove clients incompatible
+with the new policy.<a href="#section-5.11-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="send-other-mls-proposal-types">
+<section id="section-5.12">
+        <h3 id="name-send-other-mls-proposal-typ">
+<a href="#section-5.12" class="section-number selfRef">5.12. </a><a href="#name-send-other-mls-proposal-typ" class="section-name selfRef">Send other MLS proposal types</a>
+        </h3>
+<p id="section-5.12-1">We have wandered into the policies described in
+Section 6 of <span>[<a href="#I-D.ietf-mls-architecture" class="cite xref">I-D.ietf-mls-architecture</a>]</span>.<a href="#section-5.12-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.12-2.1">PSK - optional<a href="#section-5.12-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.12-2.2">ReInit - need special rules. future MLS versions. may be useful for
+moving a room to a new provider.<a href="#section-5.12-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.12-2.3">Update - what is the policy? minimum and maximum intervals<a href="#section-5.12-2.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.12-2.4">External Proposals - default allowed for uses above<a href="#section-5.12-2.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="other-room-policies">
+<section id="section-6">
+      <h2 id="name-other-room-policies">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-other-room-policies" class="section-name selfRef">Other Room Policies</a>
+      </h2>
+<p id="section-6-1">The owning provider of a room may also offer additional features such as<a href="#section-6-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-2.1">
+          <p id="section-6-2.1.1">if links to join a room are allowed, and if so:<a href="#section-6-2.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-2.1.2.1">if a password or code is required,<a href="#section-6-2.1.2.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-2.1.2.2">their validity period (ex: one week),<a href="#section-6-2.1.2.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-2.1.2.3">if they are single or multiple use, and<a href="#section-6-2.1.2.3" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-2.1.2.4">if they are only valid for a particular domain, workgroup, or user;<a href="#section-6-2.1.2.4" class="pilcrow">¶</a>
+</li>
+          </ul>
+</li>
+        <li class="normal" id="section-6-2.2">if logging is allowed, for example as required in many countries for
+financial transactions and healthcare discussion;<a href="#section-6-2.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-6-2.3">if chat bots are allowed as users;<a href="#section-6-2.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-6-2.4">
+          <p id="section-6-2.4.1">if chat history can be shared with new joiners, and if so:<a href="#section-6-2.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-2.4.2.1">if shared automatically or manually,<a href="#section-6-2.4.2.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-6-2.4.2.2">for how long,<a href="#section-6-2.4.2.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+</li>
+        <li class="normal" id="section-6-2.5">if Direct Messaging is allow inside the context of a room;<a href="#section-6-2.5" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-6-2.6">to what extent meta-data privacy is supported<a href="#section-6-2.6" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-6-3">Various messaging providers offer the option to change the name of a room, add
+a subject or topic to a room, rename nicknames, change status, change the display
+name of a user, and share presence. These features are not discussed in this
+document as some of them are out of scope of MIMI (ex: presence) and they do not
+interact strongly with the authorization of MLS primitives.<a href="#section-6-3" class="pilcrow">¶</a></p>
+<p id="section-6-4">The policy could also include a machine readable description of the anti-spam
+and anti-abuse policies. This document does <em>not</em> include such a description,
+since these policies are the same for every room, and a policy would have to
+be included for every provider with participating users in a room.<a href="#section-6-4" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-6-5">
+        <dt id="section-6-5.1">
+<strong>Hidden vs. Public</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-6-5.2">
+          <p id="section-6-5.2.1">A public room is discoverable/searchable. A hidden room is not.<a href="#section-6-5.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-6-5.3">
+<strong>Non-anonymous vs. Semi-anonymous</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-6-5.4">
+          <p id="section-6-5.4.1">In non-anonymous rooms, the expectation is that each user presents
+a long-term stable identifier which can be correlated across rooms. In
+semi-anonymous rooms, it is acceptable to obtain a pseudonymous identifier
+which is unique per room, but would still be associated with the user's
+provider.<a href="#section-6-5.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-6-5.5">
+<strong>Password-Protected vs. Unsecured</strong>:</dt>
+        <dd style="margin-left: 1.5em" id="section-6-5.6">
+          <p id="section-6-5.6.1">A password-protected room is one that a user cannot enter without first
+providing the correct password or code. An unsecured room can be
+entered without entering a password or code.<a href="#section-6-5.6.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<div id="fixed-membership-groups-naming-convention">
+<section id="section-6.1">
+        <h3 id="name-fixed-membership-groups-nam">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-fixed-membership-groups-nam" class="section-name selfRef">Fixed-membership groups, naming convention</a>
+        </h3>
+<p id="section-6.1-1">This document proposes a room naming convention for fixed-membership groups.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.1-2.1">Take the user IDs of the participants as MIMI URIs,<a href="#section-6.1-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-6.1-2.2">sort in lexical order,<a href="#section-6.1-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-6.1-2.3">concatenate and separate with the horizontal tab character (U+0009),<a href="#section-6.1-2.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-6.1-2.4">hash with SHA-256,<a href="#section-6.1-2.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-6.1-2.5">base64url encode with no padding<a href="#section-6.1-2.5" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-6.1-2.6">prepend with two octothorpe characters '#' (U+0023)<a href="#section-6.1-2.6" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-6.1-2.7">format as a MIMI URI using the provider of the first initiator of the room<a href="#section-6.1-2.7" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-6.1-3">For example, consider a fixed-membership group first created by Cathy at provider
+<code>example.com</code> with users with the following handles and providers:<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+          <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+            <tr>
+              <th class="text-right" rowspan="1" colspan="1">Handle</th>
+              <th class="text-right" rowspan="1" colspan="1">Provider</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">@cathy</td>
+              <td class="text-right" rowspan="1" colspan="1">example.com</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">@alice</td>
+              <td class="text-right" rowspan="1" colspan="1">providerA.example</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">@betty</td>
+              <td class="text-right" rowspan="1" colspan="1">providerB.example</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">@bobby</td>
+              <td class="text-right" rowspan="1" colspan="1">providerB.example</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">@willy</td>
+              <td class="text-right" rowspan="1" colspan="1">providerA.example</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-6.1-5">Represented as MIMI URIs and lexically sorted:<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.1-6">
+<pre>
+im:mimi=%40alice@providerA.example
+im:mimi=%40betty@providerB.example
+im:mimi=%40bobby@providerB.example
+im:mimi=%40cathy@example.com
+im:mimi=%40willy@providerA.example
+</pre><a href="#section-6.1-6" class="pilcrow">¶</a>
+</div>
+<p id="section-6.1-7">Concatenated with tab characters, hashed with SHA-256 (shown in hex):<a href="#section-6.1-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.1-8">
+<pre>
+c48899b3e98903a80548eebb7f4a9804cba7dedc08ac153b9570f6cb7c5b6072
+</pre><a href="#section-6.1-8" class="pilcrow">¶</a>
+</div>
+<p id="section-6.1-9">Then base64url encoded with no padding:<a href="#section-6.1-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.1-10">
+<pre>
+xIiZs-mJA6gFSO67f0qYBMun3twIrBU7lXD2y3xbYHI
+</pre><a href="#section-6.1-10" class="pilcrow">¶</a>
+</div>
+<p id="section-6.1-11">As a room name this becomes:<a href="#section-6.1-11" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.1-12">
+<pre>
+##xIiZs-mJA6gFSO67f0qYBMun3twIrBU7lXD2y3xbYHI
+</pre><a href="#section-6.1-12" class="pilcrow">¶</a>
+</div>
+<p id="section-6.1-13">And as a fixed-membership room URL in the example.com domain it becomes:<a href="#section-6.1-13" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.1-14">
+<pre>
+im:mimi=##xIiZs-mJA6gFSO67f0qYBMun3twIrBU7lXD2y3xbYHI@example.com
+</pre><a href="#section-6.1-14" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="room-join-links">
+<section id="section-6.2">
+        <h3 id="name-room-join-links">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-room-join-links" class="section-name selfRef">Room join links</a>
+        </h3>
+<p id="section-6.2-1">Room join links<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.2-2">
+<pre>
+im:mimi=#d_Nv1ZCPWArKtN0vhC_Wqw?join;code=k5KUJgAZuDesTsMVxRP
+  @example.com
+</pre><a href="#section-6.2-2" class="pilcrow">¶</a>
+</div>
+<div class="lang-tls-presentation sourcecode" id="section-6.2-3">
+<pre>
+struct {
+  Uri room;
+  opaque passcode&lt;V&gt;;
+  uint32 expiration; /* seconds since UNIX epoch */
+  bool multiple_uses;
+  Uri authorized_user;
+} CreateJoiningLinkRequest;
+</pre><a href="#section-6.2-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="room-policy-format-syntax">
+<section id="section-7">
+      <h2 id="name-room-policy-format-syntax">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-room-policy-format-syntax" class="section-name selfRef">Room Policy format syntax</a>
+      </h2>
+<p id="section-7-1">This document proposes a room policy document format using the TLS
+Presentation Language format <span>[<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>. The complete format is
+in <a href="#formal-syntax" class="auto internal xref">Section 8</a>.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">This section will explain the fields in the RoomPolicy struct in
+chunks of related policy. An elipsis indicates that a chunk has been omitted which
+was or will be explained in another part of this section.<a href="#section-7-2" class="pilcrow">¶</a></p>
+<div id="membership-related-policy">
+<section id="section-7.1">
+        <h3 id="name-membership-related-policy">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-membership-related-policy" class="section-name selfRef">Membership-related policy</a>
+        </h3>
+<div class="lang-tls-presentation sourcecode" id="section-7.1-1">
+<pre>
+enum {
+  false(0),
+  true(1)
+} bool;
+
+enum {
+  reserved(0)
+  open(1),
+  members-only(2),
+  fixed-membership(3),
+  parent-dependent(4),
+  (255)
+} MembershipStyle;
+
+struct {
+  MembershipStyle membership_style;
+  Uri parent_room_uri&lt;V&gt;;
+  bool multi_device;
+  bool knock_allowed;
+  bool moderated;
+  bool persistent_room;
+  bool password_protected;
+  ...
+} RoomPolicy;
+</pre><a href="#section-7.1-1" class="pilcrow">¶</a>
+</div>
+<p id="section-7.1-2">The <code>membership style</code> can be one of the following values as discussed in
+<a href="#room-capabilities" class="auto internal xref">Section 4</a>:<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.1-3.1">open<a href="#section-7.1-3.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-7.1-3.2">members-only (default)<a href="#section-7.1-3.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-7.1-3.3">fixed-membership<a href="#section-7.1-3.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-7.1-3.4">parent-dependent<a href="#section-7.1-3.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-7.1-4">If the <code>membership_style</code> is parent-dependent the parent_room_uri <span class="bcp14">MUST</span> be set
+with the room ID of the parent. Otherwise the field is zero-length.<a href="#section-7.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.1-5">If multi_device is true (the default), the MLS group may contain multiple
+clients per user. If false only a single client can be an MLS member at
+one time.<a href="#section-7.1-5" class="pilcrow">¶</a></p>
+<p id="section-7.1-6">If <code>knock_allowed</code> is true, a user can send a knock requesting access to the
+target room. If false, a user cannot. This option can only be enabled
+if the <code>membership_style</code> is members-only. The default is false.<a href="#section-7.1-6" class="pilcrow">¶</a></p>
+<p id="section-7.1-7">If moderated is true, the room supports granting and revoking voice. The default
+is false.<a href="#section-7.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.1-8">If <code>persistent_room</code> is false, the room will be automatically deleted when the
+corresponding MLS group is destroyed (when there are no clients in the group).
+If <code>persistent_room</code> is true, the room policy will remain and a client whose user
+has appropriate authorization can create a new MLS group for the same room.
+(There is not a 1:1 correlation of MLS group to room ID in a persistent room.)<a href="#section-7.1-8" class="pilcrow">¶</a></p>
+<p id="section-7.1-9">If <code>password_protected</code> is true, the room requires a passcode or passphrase when
+a client of a new user requests access to the GroupInfo used to join a group.
+The default is false.<a href="#section-7.1-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="pre-authorized-users">
+<section id="section-7.2">
+        <h3 id="name-pre-authorized-users">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-pre-authorized-users" class="section-name selfRef">Pre-authorized users</a>
+        </h3>
+<div class="lang-tls-presentation sourcecode" id="section-7.2-1">
+<pre>
+enum {
+  reserved(0),
+  system(1),
+  owner(2),
+  admin(3),
+  regular_user(4),
+  visitor(5),
+  banned(6),
+  (255)
+} Role;
+
+struct {
+  Role target_role;
+  /* preauth_domain consists of ASCII letters, digits, and hyphens */
+  opaque preauth_domain&lt;V&gt;;
+  /* the remaining fields are in the form of a URI */
+  opaque preauth_workgroup&lt;V&gt;;
+  opaque preauth_group&lt;V&gt;;
+  opaque preauth_user&lt;V&gt;;
+} PreAuthPerRoleList;
+
+struct {
+  ...
+  PreAuthPerRoleList pre_auth_list&lt;V&gt;;
+  ...
+} RoomPolicy;
+</pre><a href="#section-7.2-1" class="pilcrow">¶</a>
+</div>
+<p id="section-7.2-2">In <code>members-only</code> rooms, it is convenient to pre-authorize specific users--or
+users from specific domains, workgroups/teams, and groups--to specific roles.
+The workgroup, group, and user are expressed as a Uri. The domain is expressed in
+US-ASCII letters, digits, and hyphens only. If the domain is internationalized,
+the Internationalized Domain Names <span>[<a href="#RFC5890" class="cite xref">RFC5890</a>]</span> conversion <span class="bcp14">MUST</span> be done before
+filling in this value.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.2-3">Note that the system role is used to authorize external proposals for operations
+for <em>other</em> users. For example, the system role can be used to authorize a
+provider to remove clients from groups when the corresponding user account is
+deleted.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="delivery-and-read-notifications-pseudonyms">
+<section id="section-7.3">
+        <h3 id="name-delivery-and-read-notificat">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-delivery-and-read-notificat" class="section-name selfRef">Delivery and Read notifications, Pseudonyms</a>
+        </h3>
+<div class="lang-tls-presentation sourcecode" id="section-7.3-1">
+<pre>
+enum {
+  optional(0),
+  required(1),
+  forbidden(2)
+} Optionality;
+
+struct {
+  ...
+  Optionality delivery_notifications;
+  Optionality read_receipts;
+  bool pseudonymous_ids;
+  ...
+} RoomPolicy;
+</pre><a href="#section-7.3-1" class="pilcrow">¶</a>
+</div>
+<p id="section-7.3-2">The <code>delivery_notifications</code> value can be set to "forbidden",
+"optional", or "required". If the value is set to "optional", the client uses its local
+configuration to determine if it should send delivery notifications in the group.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+<p id="section-7.3-3">The <code>read_receipts</code> value can be set to "forbidden",
+"optional", or "required". If the value is set to "optional", the client uses its local
+configuration to determine if it should send read receipts in the group.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
+<p id="section-7.3-4">The format for delivery notifications and read receipts is described in
+Section 5.12 of <span>[<a href="#I-D.ietf-mimi-content" class="cite xref">I-D.ietf-mimi-content</a>]</span>.<a href="#section-7.3-4" class="pilcrow">¶</a></p>
+<p id="section-7.3-5">If <code>pseudonymous_ids</code> is true, clients in the MLS group are free to use pseudonymous
+identifiers in their MLS credentials. Otherwise the policy of the room is that
+"real" long-term identifiers are required in MLS credentials in the room's
+corresponding MLS group.<a href="#section-7.3-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="link-logging-history-and-bot-policies">
+<section id="section-7.4">
+        <h3 id="name-link-logging-history-and-bo">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-link-logging-history-and-bo" class="section-name selfRef">Link, Logging, History, and Bot policies</a>
+        </h3>
+<div class="lang-tls-presentation sourcecode" id="section-7.4-1">
+<pre>
+struct {
+  bool on_request;
+  Uri join_link;
+  bool multiuser;
+  uint32 expiration;
+  Uri link_requests;
+} LinkPolicy;
+
+struct {
+  Optionality logging;
+  Uri logging_clients&lt;V&gt;;
+  Uri machine_readable_policy;
+  Uri human_readable_policy;
+} LoggingPolicy;
+
+struct {
+  Optionality history_sharing;
+  Role who_can_share&lt;V&gt;;
+  bool automatically_share;
+  uint32 max_time_period;
+} HistoryPolicy;
+
+struct {
+  opaque name&lt;V&gt;;
+  opaque description&lt;V&gt;;
+  Uri homepage;
+  Role bot_role;
+  bool can_read;
+  bool can_write;
+  bool can_target_message_in_group;
+  bool per_user_content;
+} Bot;
+
+struct {
+  ...
+  bool discoverable;
+  LinkPolicy link_policy;
+  LoggingPolicy logging_policy;
+  HistoryPolicy history_sharing;
+  Bot allowed_bots&lt;V&gt;;
+  ...
+} RoomPolicy;
+</pre><a href="#section-7.4-1" class="pilcrow">¶</a>
+</div>
+<div id="link-policies">
+<section id="section-7.4.1">
+          <h4 id="name-link-policies">
+<a href="#section-7.4.1" class="section-number selfRef">7.4.1. </a><a href="#name-link-policies" class="section-name selfRef">Link policies</a>
+          </h4>
+<p id="section-7.4.1-1">If <code>discoverable</code> is true, the room is searchable. Presumably this means the
+the only way to join the room in a client user interface is to be added by
+an administrator or to use a joining link.<a href="#section-7.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-2">Inside the LinkPolicy are several fields that describe the behavior of links.<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-3">If the <code>on_request</code> field is true, no joining link will be provided in the
+room policy; the client will need to fetch a joining link out-of-band or
+generate a valid one for itself. If present, the URI in <code>link_requests</code>
+can be used by the client to request an invite code.
+The value of <code>join_link</code> is empty and the other fields are ignored.<a href="#section-7.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-4">If the <code>on_request</code> field is false, the <code>join_link</code> field will contain a
+joining link. If the link will work for multiple users, <code>multiuser</code> is true.
+The expiration field represents the time, in seconds after the start of the
+UNIX epoch (1-January-1970) when the link will expire. The <code>link_requests</code> field
+can be empty.<a href="#section-7.4.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="logging-policies">
+<section id="section-7.4.2">
+          <h4 id="name-logging-policies">
+<a href="#section-7.4.2" class="section-number selfRef">7.4.2. </a><a href="#name-logging-policies" class="section-name selfRef">Logging policies</a>
+          </h4>
+<p id="section-7.4.2-1">Inside the LoggingPolicy, the <code>logging</code> field can be forbidden, optional, or
+required. If <code>logging</code> is forbidden then the other fields are empty. If
+<code>logging</code> is required, the list of <code>logging_clients</code> needs to contain at least
+one logging URI. Each provider should have no more than one logging client at
+a time in a room.
+The <code>machine_readable_policy</code> and <code>human_readable_policy</code> fields optionally
+contain pointers to the owning provider's machine readable and human readable
+logging policies, respectively.
+If <code>logging</code> is optional and there is at least one <code>logging_client</code> then logging
+is active for the room.<a href="#section-7.4.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="chat-history-policies">
+<section id="section-7.4.3">
+          <h4 id="name-chat-history-policies">
+<a href="#section-7.4.3" class="section-number selfRef">7.4.3. </a><a href="#name-chat-history-policies" class="section-name selfRef">Chat history policies</a>
+          </h4>
+<p id="section-7.4.3-1">Inside the HistoryPolicy, if <code>history_sharing</code> is forbidden, this means that
+clients (including bots) are expected to not to share chat history with new
+joiners, in which case <code>who_can_share</code> is empty, <code>automatically_share</code> is false,
+and <code>max_time_period</code> is zero.<a href="#section-7.4.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-2">Otherwise <code>who_can_share</code> is a list of roles that
+are authorized to share history (for example, only admins and owners can share).
+The values of none and outcast cannot be used in <code>who_can_share</code>. If
+<code>automatically_share</code> is true, clients can share history with new joiners without
+user initiation. The history that is shared is limited to <code>max_time_period</code> seconds
+worth of history.<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="chat-bot-policies">
+<section id="section-7.4.4">
+          <h4 id="name-chat-bot-policies">
+<a href="#section-7.4.4" class="section-number selfRef">7.4.4. </a><a href="#name-chat-bot-policies" class="section-name selfRef">Chat bot policies</a>
+          </h4>
+<p id="section-7.4.4-1">Inside the RoomPolicy there is a list of <code>allowed_bots</code>. Each of which has
+several fields. The <code>name</code>, <code>description</code>, and <code>homepage</code> are merely descriptive.
+The <code>bot_role</code> indicates if the chat bot would be treated as a <code>system-user</code>, <code>owner</code>,
+<code>admin</code>, <code>regular_user</code>, or <code>visitor</code>.<a href="#section-7.4.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.4.4-2">The <code>can_read</code> and <code>can_write</code> fields indicate if the chat bot is allowed to
+read messages or send messages in the MLS group, respectively.
+If <code>can_target_message_in_group</code> is true it indicates that the chat bot can
+send an MLS targeted message (see Section 2.2 of <span>[<a href="#I-D.ietf-mls-extensions" class="cite xref">I-D.ietf-mls-extensions</a>]</span>)
+or use a different conversation or out-of-band
+channel to send a message to specific individual users in the room. If
+<code>per_user_content</code> is true, the chat bot is allowed to send messages with distinct
+content to each member. (For example a poker bot could deal a different hand
+to each user in a chat).<a href="#section-7.4.4-2" class="pilcrow">¶</a></p>
+<p id="section-7.4.4-3">Users could set policies to reject or leave groups with bots rights that are
+inconsistent with the user's privacy goals.<a href="#section-7.4.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="extensibility-of-the-policy-format">
+<section id="section-7.5">
+        <h3 id="name-extensibility-of-the-policy">
+<a href="#section-7.5" class="section-number selfRef">7.5. </a><a href="#name-extensibility-of-the-policy" class="section-name selfRef">Extensibility of the policy format</a>
+        </h3>
+<div class="lang-tls-presentation sourcecode" id="section-7.5-1">
+<pre>
+enum {
+  null(0),
+  boolean(1),
+  number(2),
+  string(3),
+  jsonObject(4)
+} ExtType;
+
+struct {
+  opaque name&lt;V&gt;;
+  ExtType type;
+  opaque value&lt;V&gt;;
+} PolicyExtension;
+
+struct {
+  ...
+  PolicyExtension policy_extensions&lt;V&gt;;
+} RoomPolicy;
+</pre><a href="#section-7.5-1" class="pilcrow">¶</a>
+</div>
+<p id="section-7.5-2">Finally, The extensibility mechanism allows for future addition of new room
+policies.<a href="#section-7.5-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="formal-syntax">
+<section id="section-8">
+      <h2 id="name-formal-syntax">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-formal-syntax" class="section-name selfRef">Formal Syntax</a>
+      </h2>
+<p id="section-8-1">Below is the complete TLS Presentation<a href="#section-8-1" class="pilcrow">¶</a></p>
+<div class="breakable lang-tls-presentation sourcecode" id="section-8-2">
+<pre>
+enum {
+  false(0),
+  true(1)
+} bool;
+
+struct {
+  /* a valid Uniform Resource Identifier (URI) */
+  opaque uri&lt;V&gt;;
+} Uri;
+
+enum {
+  optional(0),
+  required(1),
+  forbidden(2)
+} Optionality;
+
+enum {
+  reserved(0),
+  system(1),
+  owner(2),
+  admin(3),
+  regular_user(4),
+  visitor(5),
+  banned(6),
+  (255)
+} Role;
+
+struct {
+  Role target_role;
+  /* preauth_domain consists of ASCII letters, digits, and hyphens */
+  opaque preauth_domain&lt;V&gt;;
+  /* the remaining fields are in the form of a URI */
+  opaque preauth_workgroup&lt;V&gt;;
+  opaque preauth_group&lt;V&gt;;
+  opaque preauth_user&lt;V&gt;;
+} PreAuthPerRoleList;
+
+enum {
+  reserved(0)
+  open(1),
+  members-only(2),
+  fixed-membership(3),
+  parent-dependent(4),
+  (255)
+} MembershipStyle;
+
+struct {
+  Optionality logging;
+  bool enabled;
+  Uri logging_clients&lt;V&gt;;
+  Uri machine_readable_policy;
+  Uri human_readable_policy;
+} LoggingPolicy;
+
+struct {
+  bool on_request;
+  Uri join_link;
+  bool multiuser;
+  uint32 expiration;
+  Uri link_requests;
+} LinkPolicy;
+
+struct {
+  opaque name&lt;V&gt;;
+  opaque description&lt;V&gt;;
+  Uri homepage;
+  Role bot_role;
+  bool can_read;
+  bool can_write;
+  bool can_target_message_in_group;
+  bool per_user_content;
+} Bot;
+
+struct {
+  Optionality history_sharing;
+  Role who_can_share&lt;V&gt;;
+  bool automatically_share;
+  uint32 max_time_period;
+} HistoryPolicy;
+
+enum {
+  null(0),
+  boolean(1),
+  number(2),
+  string(3),
+  jsonObject(4)
+} ExtType;
+
+struct {
+  opaque name&lt;V&gt;;
+  ExtType type;
+  opaque value&lt;V&gt;;
+} PolicyExtension;
+
+struct {
+  MembershipStyle membership_style;
+  bool multi_device;
+  bool knock_allowed;
+  bool moderated;
+  bool password_protected;
+  PreAuthPerRoleList pre_auth_list&lt;V&gt;;
+  Uri parent_room_uri;
+  bool persistent_room;
+  Optionality delivery_notifications;
+  Optionality read_receipts;
+  bool semi_anonymous_ids;
+  bool discoverable;
+  LinkPolicy link_policy;
+  LoggingPolicy logging_policy;
+  HistoryPolicy history_sharing;
+  Bot allowed_bots&lt;V&gt;;
+  PolicyExtension policy_extensions&lt;V&gt;;
+} RoomPolicy;
+
+RoomPolicy room_policy;
+</pre><a href="#section-8-2" class="pilcrow">¶</a>
+</div>
+<div id="mls-extension">
+<section id="section-8.1">
+        <h3 id="name-mls-extension">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-mls-extension" class="section-name selfRef">MLS extension</a>
+        </h3>
+<p id="section-8.1-1"><span>[<a href="#I-D.mahy-mls-room-policy-ext" class="cite xref">I-D.mahy-mls-room-policy-ext</a>]</span> defines a new <code>room_policy</code> GroupContext
+extension to MLS, that holds the room policy document format described in
+this document.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="specific-examples">
+<section id="section-9">
+      <h2 id="name-specific-examples">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-specific-examples" class="section-name selfRef">Specific examples</a>
+      </h2>
+<div id="one-on-one-chat">
+<section id="section-9.1">
+        <h3 id="name-one-on-one-chat">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-one-on-one-chat" class="section-name selfRef">One-on-one chat</a>
+        </h3>
+<p id="section-9.1-1">A 1:1 chat is a fixed-membership room with exactly two specific pre-authorized
+users: "@alice@providerA.example" (owner) and "@bobby@providerB.example"
+(regular-user). For fixed-membership rooms all users in the room must be
+explicitly pre-authorized. Each user can each have multiple clients. Also
+included are system users from the providers who are authorized to remove
+their own users if their accounts have been deleted.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.1-2">Even if both Alice and Bob "leave the room" and delete the corresponding MLS group,
+if either initiates a DM to the other at a later time, the room itself is
+persistent and can be associated with a different (new) MLS group.<a href="#section-9.1-2" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-9.1-3">
+<pre>
+room_policy.membership-style = fixed;
+room_policy.persistent_room = true;
+
+room_policy.pre_auth_list[0].target_role = system;
+room_policy.pre_auth_list[0].preauth_user[0] =
+   "im:mimi=providerA.example";
+room_policy.pre_auth_list[0].preauth_user[1] =
+   "im:mimi=providerB.example";
+
+room_policy.pre_auth_list[1].target_role = owner;
+room_policy.pre_auth_list[1].preauth_user[0] =
+   "im:mimi=%40alice@providerA.example";
+
+room_policy.pre_auth_list[2].target_role = regular_user;
+room_policy.pre_auth_list[2].preauth_user[0] =
+   "im:mimi=%40bobby@providerB.example";
+</pre><a href="#section-9.1-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="administrated-room">
+<section id="section-9.2">
+        <h3 id="name-administrated-room">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-administrated-room" class="section-name selfRef">Administrated room</a>
+        </h3>
+<p id="section-9.2-1">In this simple administrated room, Alice is the owner.
+If Alice adds another user, the user does not need to be added to the
+pre-authorized list while one of the user's clients is a member of the
+MLS group, but if the user requires a role other than default one, Alice
+will need to add the new user to the pre-authorization list of the new role.<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-9.2-2">
+<pre>
+room_policy.membership-style = members-only;
+room_policy.pre_auth_list[0].target_role = owner;
+room_policy.pre_auth_list[0].preauth_user[0] =
+   "im:mimi=%40alice@providerA.example";
+</pre><a href="#section-9.2-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="open-room">
+<section id="section-9.3">
+        <h3 id="name-open-room">
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-open-room" class="section-name selfRef">Open room</a>
+        </h3>
+<p id="section-9.3-1">In this open room, Alice is an admin and can kick or ban
+other occupants of the room.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-9.3-2">
+<pre>
+room_policy.membership-style = open;
+room_policy.pre_auth_list[1].target_role = admin;
+room_policy.pre_auth_list[1].preauth_user[0] =
+   "im:mimi=%40alice@providerA.example"
+</pre><a href="#section-9.3-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="semi-open-room">
+<section id="section-9.4">
+        <h3 id="name-semi-open-room">
+<a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-semi-open-room" class="section-name selfRef">Semi-open room</a>
+        </h3>
+<p id="section-9.4-1">In this room, anyone from the "engineering" workgroup of
+<code>example.com</code> can automatically join as an admin. Anyone
+from the <code>example.net</code> domain, the "sales" workgroup
+of <code>example.com</code>, or the "companyX" workgroup of <code>provider.example</code>
+can join as a regular-user. Other users could be added manually
+by an admin, via the join link below, or via a knock.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-9.4-2">
+<pre>
+room_policy.membership-style = members-only;
+room_policy.persistent_room = true;
+room_policy.knock_allowed = true;
+
+room_policy.pre_auth_list[0].target_role = admin;
+room_policy.pre_auth_list[0].preauth_workgroup[0] =
+   "im:mimi=#engineering@example.com"
+
+room_policy.pre_auth_list[1].target_role = regular_user
+room_policy.pre_auth_list[1].preauth_domain[0] =
+   "im:mimi=example.net";
+room_policy.pre_auth_list[1].preauth_workgroup[0] =
+   "im:mimi=#sales@example.com";
+room_policy.pre_auth_list[1].preauth_workgroup[1] =
+   "im:mimi=#companyX@provider.example";
+
+room_policy.link_policy.on_request = false;
+room_policy.link_policy.join_link =
+   "im:mimi=#d_Nv1ZCPWArKtN0vhC_Wqw?join;" +
+   "code=k5KUJgAZuDesTsMVxRP@example.com";
+room_policy.link_policy.multiuser = true;
+room_policy.link_policy.expiration =
+  1699207200;  /* 2023-11-05 18:00:00 UTC */
+room_policy.link_policy.link_requests =
+  "https://im.example.com/link-me?room=" +
+  "#d_Nv1ZCPWArKtN0vhC_Wqw@example.com";
+</pre><a href="#section-9.4-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="moderated-room">
+<section id="section-9.5">
+        <h3 id="name-moderated-room">
+<a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-moderated-room" class="section-name selfRef">Moderated room</a>
+        </h3>
+<p id="section-9.5-1">In this moderated room, Alice is an owner and Adam is a admin.
+When Bob and Cathy join the group, neither of them can send
+messages to the group until Alice or Adam grants them "voice",
+most likely using a machine-readable message.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-9.5-2">
+<pre>
+room_policy.membership-style = members-only;
+room_policy.moderated = true;
+
+room_policy.pre_auth_list[0].target_role = owner;
+room_policy.pre_auth_list[0].preauth_user[0] =
+   "im:mimi=%40alice@providerA.example";
+
+room_policy.pre_auth_list[1].target_role = admin;
+room_policy.pre_auth_list[1].preauth_user[0] =
+   "im:mimi=%40adam@providerA.example";
+</pre><a href="#section-9.5-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="room-with-mandatory-logging">
+<section id="section-9.6">
+        <h3 id="name-room-with-mandatory-logging">
+<a href="#section-9.6" class="section-number selfRef">9.6. </a><a href="#name-room-with-mandatory-logging" class="section-name selfRef">Room with mandatory logging</a>
+        </h3>
+<p id="section-9.6-1">Alice messages her doctor Cathy. Cathy's provider requires logging
+of all patient interactions. The logging client shows up in the
+"roster"/user-list that Alice sees. Alice's client learns about
+the logging even before the first message with Cathy. Because the
+room is administered instead of fixed-membership, either
+user (since both have at least admin permissions) could add another
+user to the room. For example, Alice might include her partner, child,
+or parent. Cathy might add a nurse, lab technician, assistant,
+intern, or specialist.<a href="#section-9.6-1" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-9.6-2">
+<pre>
+room_policy.membership-style = members-only;
+room_policy.pre_auth_list[0].target_role = owner;
+room_policy.pre_auth_list[0].preauth_user[0] =
+   "im:mimi=%40alice@providerA.example";
+
+room_policy.pre_auth_list[1].target_role = admin;
+room_policy.pre_auth_list[1].preauth_user[0] =
+   "im:mimi=%40cathy@medicalProviderC.example";
+
+room_policy.logging_policy.logging = required;
+room_policy.logging_policy.enabled = true;
+
+room_policy.logging_policy.logging_clients[0] =
+  "im:mimi=%40logging/#Y9agWMglTlaP8F251hmgVQ" +
+  "medicalProviderC.example";
+
+room_policy.logging_policy.machine_readable_policy =
+  "https://medicalProviderC.example/P3P/im_policy.xml";
+room_policy.logging_policy.human_readable_policy =
+  "https://medicalProviderC.example/legal/IM+logging.html";
+</pre><a href="#section-9.6-2" class="pilcrow">¶</a>
+</div>
+<p id="section-9.6-3">If instead of being a patient, Alice was an auditor, whose
+provider required logging as well, each provider could have its
+own authorized logger.<a href="#section-9.6-3" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-9.6-4">
+<pre>
+room_policy.logging_policy.logging_clients[1] =
+  "im:mimi=%40auditlogging/#Y9agWMglTlaP8F251hmgVQ" +
+  "providerA.example";
+</pre><a href="#section-9.6-4" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-10">
+      <h2 id="name-iana-considerations">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-10-1">This document registers the "application/mimi-room-policy" media type.
+The registration template follows:<a href="#section-10-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-10-2">
+        <dt id="section-10-2.1">Type name:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.2">
+          <p id="section-10-2.2.1">application<a href="#section-10-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.3">Subtype name:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.4">
+          <p id="section-10-2.4.1">mimi-room-policy<a href="#section-10-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.5">Required parameters:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.6">
+          <p id="section-10-2.6.1">none<a href="#section-10-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.7">Optional parameters:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.8">
+          <span class="break"></span><dl class="dlParallel" id="section-10-2.8.1">
+            <dt id="section-10-2.8.1.1">version</dt>
+            <dd style="margin-left: 1.5em" id="section-10-2.8.1.2">
+              <p id="section-10-2.8.1.2.1"></p><a href="#section-10-2.8.1.2" class="pilcrow">¶</a>
+</dd>
+            <dd class="break"></dd>
+<dt id="section-10-2.8.1.3">  version:</dt>
+            <dd style="margin-left: 1.5em" id="section-10-2.8.1.4">
+              <p id="section-10-2.8.1.4.1">The MIMI room policy protocol version expressed as a string
+  <code>&lt;major&gt;.&lt;minor&gt;</code>.  If omitted the version is "1.0", which
+  corresponds to the version published in RFC XXXX.<a href="#section-10-2.8.1.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+</dl>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.9">Encoding considerations:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.10">
+          <p id="section-10-2.10.1">MIMI room policy documents are represented using the TLS
+presentation language <span>[<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>. Therefore this media type needs to be
+treated as binary data.<a href="#section-10-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.11">Security considerations:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.12">
+          <p id="section-10-2.12.1">MIMI room policy documents can contain sensitive information and are
+designed to be transmitted either inside encrypted and authenticated
+Messaging Layer Security (MLS) <span>[<a href="#I-D.ietf-mls-protocol" class="cite xref">I-D.ietf-mls-protocol</a>]</span> messages,
+or over a protocol protected using a secure transport such as HTTP
+<span>[<a href="#RFC9112" class="cite xref">RFC9112</a>]</span> <span>[<a href="#RFC9113" class="cite xref">RFC9113</a>]</span> <span>[<a href="#RFC9114" class="cite xref">RFC9114</a>]</span> over TLS <span>[<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>. The
+security considerations in this document (RFC XXXX) also apply.<a href="#section-10-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.13">Interoperability considerations:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.14">
+          <p id="section-10-2.14.1">N/A<a href="#section-10-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.15">Published specification:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.16">
+          <p id="section-10-2.16.1">RFC XXXX<a href="#section-10-2.16.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.17">Applications that use this media type:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.18">
+          <p id="section-10-2.18.1">MLS-based instant messaging applications<a href="#section-10-2.18.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-2.19">Fragment identifier considerations:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-2.20">
+          <p id="section-10-2.20.1">N/A<a href="#section-10-2.20.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-10-3">Additional information:<a href="#section-10-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10-4.1">Deprecated alias names for this type: N/A<a href="#section-10-4.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-10-4.2">Magic number(s): N/A<a href="#section-10-4.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-10-4.3">File extension(s): N/A<a href="#section-10-4.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-10-4.4">Macintosh file type code(s): N/A<a href="#section-10-4.4" class="pilcrow">¶</a>
+</li>
+      </ul>
+<span class="break"></span><dl class="dlParallel" id="section-10-5">
+        <dt id="section-10-5.1">Person &amp; email address to contact for further information:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-5.2">
+          <p id="section-10-5.2.1">IETF MIMI Working Group <a href="mailto:mimi@ietf.org">mimi@ietf.org</a><a href="#section-10-5.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-5.3">Intended usage:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-5.4">
+          <p id="section-10-5.4.1">COMMON<a href="#section-10-5.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-5.5">Restrictions on usage:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-5.6">
+          <p id="section-10-5.6.1">N/A<a href="#section-10-5.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-5.7">Author:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-5.8">
+          <p id="section-10-5.8.1">IETF MIMI Working Group<a href="#section-10-5.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-5.9">Change controller:</dt>
+        <dd style="margin-left: 1.5em" id="section-10-5.10">
+          <p id="section-10-5.10.1">IESG<a href="#section-10-5.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-10-5.11">Provisional registration? (standards tree only):</dt>
+        <dd style="margin-left: 1.5em" id="section-10-5.12">
+          <p id="section-10-5.12.1">No<a href="#section-10-5.12.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-11">
+      <h2 id="name-security-considerations">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-11-1">While this section is not started, the entire focus of this document is on
+authorization.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">The goal is to consider and balance consent, authorization, and privacy
+requirements from:<a href="#section-11-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-11-3.1">providers<a href="#section-11-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-11-3.2">owners and administrators of rooms<a href="#section-11-3.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-11-3.3">other users<a href="#section-11-3.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+</section>
+</div>
+<section id="section-12">
+      <h2 id="name-references">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-12.1">
+        <h3 id="name-normative-references">
+<a href="#section-12.1" class="section-number selfRef">12.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.ietf-mls-protocol">[I-D.ietf-mls-protocol]</dt>
+        <dd>
+<span class="refAuthor">Barnes, R.</span>, <span class="refAuthor">Beurdouche, B.</span>, <span class="refAuthor">Robert, R.</span>, <span class="refAuthor">Millican, J.</span>, <span class="refAuthor">Omara, E.</span>, and <span class="refAuthor">K. Cohn-Gordon</span>, <span class="refTitle">"The Messaging Layer Security (MLS) Protocol"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-mls-protocol-20</span>, <time datetime="2023-03-27" class="refDate">27 March 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-mls-protocol-20">https://datatracker.ietf.org/doc/html/draft-ietf-mls-protocol-20</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5890">[RFC5890]</dt>
+        <dd>
+<span class="refAuthor">Klensin, J.</span>, <span class="refTitle">"Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework"</span>, <span class="seriesInfo">RFC 5890</span>, <span class="seriesInfo">DOI 10.17487/RFC5890</span>, <time datetime="2010-08" class="refDate">August 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5890">https://www.rfc-editor.org/rfc/rfc5890</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8446">[RFC8446]</dt>
+      <dd>
+<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 8446</span>, <span class="seriesInfo">DOI 10.17487/RFC8446</span>, <time datetime="2018-08" class="refDate">August 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8446">https://www.rfc-editor.org/rfc/rfc8446</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<section id="section-12.2">
+        <h3 id="name-informative-references">
+<a href="#section-12.2" class="section-number selfRef">12.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="DoubleRatchet">[DoubleRatchet]</dt>
+        <dd>
+<span class="refAuthor">Perrin, T.</span> and <span class="refAuthor">M. Marlinspike</span>, <span class="refTitle">"The Double Ratchet Algorithm"</span>, <time datetime="2016-11-20" class="refDate">20 November 2016</time>, <span>&lt;<a href="https://signal.org/docs/specifications/doubleratchet">https://signal.org/docs/specifications/doubleratchet</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-mimi-content">[I-D.ietf-mimi-content]</dt>
+        <dd>
+<span class="refAuthor">Mahy, R.</span>, <span class="refTitle">"More Instant Messaging Interoperability (MIMI) message content"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-mimi-content-00</span>, <time datetime="2023-06-20" class="refDate">20 June 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-mimi-content-00">https://datatracker.ietf.org/doc/html/draft-ietf-mimi-content-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-mls-architecture">[I-D.ietf-mls-architecture]</dt>
+        <dd>
+<span class="refAuthor">Beurdouche, B.</span>, <span class="refAuthor">Rescorla, E.</span>, <span class="refAuthor">Omara, E.</span>, <span class="refAuthor">Inguva, S.</span>, and <span class="refAuthor">A. Duric</span>, <span class="refTitle">"The Messaging Layer Security (MLS) Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-mls-architecture-10</span>, <time datetime="2022-12-16" class="refDate">16 December 2022</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-mls-architecture-10">https://datatracker.ietf.org/doc/html/draft-ietf-mls-architecture-10</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-mls-extensions">[I-D.ietf-mls-extensions]</dt>
+        <dd>
+<span class="refAuthor">Robert, R.</span>, <span class="refTitle">"The Messaging Layer Security (MLS) Extensions"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-mls-extensions-01</span>, <time datetime="2023-03-13" class="refDate">13 March 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-mls-extensions-01">https://datatracker.ietf.org/doc/html/draft-ietf-mls-extensions-01</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-privacypass-architecture">[I-D.ietf-privacypass-architecture]</dt>
+        <dd>
+<span class="refAuthor">Davidson, A.</span>, <span class="refAuthor">Iyengar, J.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"The Privacy Pass Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-privacypass-architecture-13</span>, <time datetime="2023-06-15" class="refDate">15 June 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-privacypass-architecture-13">https://datatracker.ietf.org/doc/html/draft-ietf-privacypass-architecture-13</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.mahy-mls-room-policy-ext">[I-D.mahy-mls-room-policy-ext]</dt>
+        <dd>
+<span class="refAuthor">Mahy, R.</span>, <span class="refTitle">"A Messaging Layer Security (MLS) extension for More Instant Messaging Interoperability (MIMI) room policies"</span>, <time datetime="2023-07-11" class="refDate">11 July 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-mahy-mls-room-policy-ext-00">https://datatracker.ietf.org/doc/html/draft-mahy-mls-room-policy-ext-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ralston-mimi-terminology">[I-D.ralston-mimi-terminology]</dt>
+        <dd>
+<span class="refAuthor">Ralston, T.</span>, <span class="refTitle">"MIMI Terminology"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ralston-mimi-terminology-02</span>, <time datetime="2023-07-10" class="refDate">10 July 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ralston-mimi-terminology-02">https://datatracker.ietf.org/doc/html/draft-ralston-mimi-terminology-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.robert-mimi-delivery-service">[I-D.robert-mimi-delivery-service]</dt>
+        <dd>
+<span class="refAuthor">Robert, R.</span> and <span class="refAuthor">K. Kohbrok</span>, <span class="refTitle">"MIMI Delivery Service"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-robert-mimi-delivery-service-02</span>, <time datetime="2023-05-17" class="refDate">17 May 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-robert-mimi-delivery-service-02">https://datatracker.ietf.org/doc/html/draft-robert-mimi-delivery-service-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="MUC">[MUC]</dt>
+        <dd>
+<span class="refAuthor">Saint-Andre, P.</span>, <span class="refTitle">"Multi-User Chat"</span>, <span class="seriesInfo">XSF XEP 0045</span>, <time datetime="2022-12-01" class="refDate">1 December 2022</time>, <span>&lt;<a href="http://xmpp.org/extensions/xep-0045.html">http://xmpp.org/extensions/xep-0045.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9112">[RFC9112]</dt>
+        <dd>
+<span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M., Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP/1.1"</span>, <span class="seriesInfo">STD 99</span>, <span class="seriesInfo">RFC 9112</span>, <span class="seriesInfo">DOI 10.17487/RFC9112</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9112">https://www.rfc-editor.org/rfc/rfc9112</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9113">[RFC9113]</dt>
+        <dd>
+<span class="refAuthor">Thomson, M., Ed.</span> and <span class="refAuthor">C. Benfield, Ed.</span>, <span class="refTitle">"HTTP/2"</span>, <span class="seriesInfo">RFC 9113</span>, <span class="seriesInfo">DOI 10.17487/RFC9113</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9113">https://www.rfc-editor.org/rfc/rfc9113</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9114">[RFC9114]</dt>
+        <dd>
+<span class="refAuthor">Bishop, M., Ed.</span>, <span class="refTitle">"HTTP/3"</span>, <span class="seriesInfo">RFC 9114</span>, <span class="seriesInfo">DOI 10.17487/RFC9114</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9114">https://www.rfc-editor.org/rfc/rfc9114</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="XMPP">[XMPP]</dt>
+      <dd>
+<span class="refAuthor">Saint-Andre, P.</span>, <span class="refTitle">"Extensible Messaging and Presence Protocol (XMPP): Core"</span>, <span class="seriesInfo">RFC 6120</span>, <span class="seriesInfo">DOI 10.17487/RFC6120</span>, <time datetime="2011-03" class="refDate">March 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6120">https://www.rfc-editor.org/rfc/rfc6120</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</section>
+<div id="acknowledgments">
+<section id="appendix-A">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-A-1">Thanks to Peter Saint-Andre for the clear terminology in XEP-0045 <span>[<a href="#MUC" class="cite xref">MUC</a>]</span>, much of which was
+borrowed here.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="todos">
+<section id="appendix-B">
+      <h2 id="name-todos">
+<a href="#name-todos" class="section-name selfRef">TODOs</a>
+      </h2>
+<ul class="normal">
+<li class="normal" id="appendix-B-1.1">Check the authorization rules more thoroughly in the "Update the room /
+group policy" Section.<a href="#appendix-B-1.1" class="pilcrow">¶</a>
+</li>
+      </ul>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-C">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Rohan Mahy</span></div>
+<div dir="auto" class="left"><span class="org">Wire</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:rohan.mahy@wire.com" class="email">rohan.mahy@wire.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
